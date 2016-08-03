@@ -20,8 +20,8 @@ alias ..6="cd ../../../../../.."
 # Go to home directory
 alias ~="cd ~"
 
-# List files
-alias ll="ls -l"
+# List files and folders
+alias ll="ls -FGlAhp"
 
 # Clear terminal display
 alias c="clear"
