@@ -160,3 +160,10 @@ extract()
   return 1
 }
 export -f extract
+
+#@brief zipf Compress a specific file or folder (zip format)
+#
+#@param $1 File or folder to compress
+zipf() {
+  zip -r "$1".zip "$1"
+}
