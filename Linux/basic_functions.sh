@@ -9,7 +9,7 @@
 #@note Use "source filename_here.sh" to use functions in shell
 
 #@brief waitUserAction Wait user to press any key to continue
-waitUserAction()
+function waitUserAction()
 {
   read -p "Press any key to continue" -n1 -s
   echo ""
@@ -19,7 +19,7 @@ export -f waitUserAction
 #@brief checkRoot Check if root
 #
 #@return 0 if root else 1
-isRoot()
+function isRoot()
 {
   if [[ $EUID -ne 0 ]]; then
     echo "You don't have root privilege" 2>&1
@@ -40,7 +40,7 @@ export -f isRoot
 #@return All package are installed (1) else 0
 #
 #@example "fastInstall vim sudo htop"
-fastInstall()
+function fastInstall()
 {
   INSTALL_OPTIONS="-y -qq"
   if [ -z "$1" ]; then
@@ -71,7 +71,7 @@ export -f fastInstall
 #@return All package are installed (1) else 0
 #
 #@example "install vim sudo htop"
-install()
+function install()
 {
   if [ -z "$1" ]; then
     echo "Wrong parameters in install()"
@@ -93,7 +93,7 @@ install()
 export -f install
 
 #@brief updateAndUpgrade Update and upgrade the system without human interaction
-updateAndUpgrade(){
+function updateAndUpgrade(){
   sudo apt-get update --yes
   sudo apt-get dist-upgrade --yes
 }
@@ -111,7 +111,7 @@ export -f updateAndUpgrade
 #@return 1 (wrong args) / 0 (valid args)
 #
 #@example 'replaceLineOrAddEndFile /etc/ssh/sshd_config "Port 22" "Port 50555"'
-replaceLineOrAddEndFile()
+function replaceLineOrAddEndFile()
 {
   if [ "$#" -ne 3 ]; then
     echo "Wrong parameters in replaceLineOrAddEndFile()"
@@ -133,7 +133,7 @@ export -f replaceLineOrAddEndFile
 #@return 1 (file not supported) / 0 (file supported)
 #
 #@example 'extract my_file.zip'
-extract()
+function extract()
 {
   if [ -f $1 ] ; then
     case $1 in
@@ -164,9 +164,10 @@ export -f extract
 #@brief zipf Compress a specific file or folder (zip format)
 #
 #@param $1 File or folder to compress
-zipf() {
+function zipf() {
   zip -r "$1".zip "$1"
 }
+export -f zipf
 
 #@brief mkdircd Recursive folder creation and then go in it
 #
