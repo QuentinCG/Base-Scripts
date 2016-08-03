@@ -34,3 +34,7 @@ alias lr='ls -R | grep ":$" | sed -e '\''s/:$//'\'' -e '\''s/[^-][^\/]*\//--/g'\
 
 # Find all files in current sub-folders containing specific string
 alias findIn="find . -type f -print0 | xargs -0 grep -l"
+
+# Git
+alias push="git push origin master"
+alias pull="git pull"
