@@ -31,7 +31,7 @@ function isRoot()
 }
 export -f isRoot
 
-#@brief fastInstall Install Packages without human interaction
+#@brief fastInstall Install Packages without human interaction (automatic)
 #
 # Try to install all specified packages (even if some of them can't be installed)
 #
@@ -62,7 +62,7 @@ function fastInstall()
 }
 export -f fastInstall
 
-#@brief install Install Packages with human interaction
+#@brief install Install Packages with human visible information (automatic)
 #
 # Try to install all specified packages (even if some of them can't be installed)
 #
@@ -81,7 +81,7 @@ function install()
   for ARG in "$@"
   do
     if apt-get --simulate install $INSTALL_OPTIONS $ARG > /dev/null; then
-      sudo apt-get install $ARG
+      sudo apt-get install -y $ARG
       echo "Package '$ARG' installed"
     else
       echo "Impossible to install '$ARG'. Is this package valid?"
