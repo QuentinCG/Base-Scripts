@@ -167,3 +167,16 @@ export -f extract
 zipf() {
   zip -r "$1".zip "$1"
 }
+
+#@brief mkdircd Recursive folder creation and then go in it
+#
+#@param $1 folders to create and go in
+#
+#@example ~> mkdircd numerous/folders/hehe/hehe
+#         ~/numerous/folders/hehe/hehe>
+function mkdircd()
+{
+  mkdir -p "$1" && eval cd "\"\$1\"";
+}
+export -f mkdircd
+alias cdmkdir="mkdircd"
