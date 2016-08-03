@@ -6,7 +6,7 @@
 #@license MIT License (contact me if too restrictive)
 #@copyright Copyright (c) 2016 Quentin Comte-Gaz
 #
-#@note Put those commands in ~/.bashrc to use them after login
+#@note Put those commands in ~/.bashrc to launch them when logged
 
 # Auto-correct "cd" errors with dir names
 shopt -s cdspell
