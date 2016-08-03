@@ -12,4 +12,4 @@
 shopt -s cdspell
 
 # Display a 80 characters line between every command in the shell
-export PS1="_______________________________________________________________________________\n\u@\h:\w#"
+export PS1="_______________________________________________________________________________\n\u@\h:\w$ "
