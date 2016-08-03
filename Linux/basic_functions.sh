@@ -51,7 +51,7 @@ fastInstall()
   for ARG in "$@"
   do
     if apt-get --simulate install $INSTALL_OPTIONS $ARG > /dev/null; then
-      apt-get install $INSTALL_OPTIONS $ARG  > /dev/null
+      sudo apt-get install $INSTALL_OPTIONS $ARG  > /dev/null
       echo "Package '$ARG' installed"
     else
       echo "Impossible to install '$ARG'. Is this package valid?"
@@ -81,7 +81,7 @@ install()
   for ARG in "$@"
   do
     if apt-get --simulate install $INSTALL_OPTIONS $ARG > /dev/null; then
-      apt-get install $ARG
+      sudo apt-get install $ARG
       echo "Package '$ARG' installed"
     else
       echo "Impossible to install '$ARG'. Is this package valid?"
@@ -94,8 +94,8 @@ export -f install
 
 #@brief updateAndUpgrade Update and upgrade the system without human interaction
 updateAndUpgrade(){
-  apt-get update --yes
-  apt-get dist-upgrade --yes
+  sudo apt-get update --yes
+  sudo apt-get dist-upgrade --yes
 }
 export -f updateAndUpgrade
 
