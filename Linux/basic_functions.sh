@@ -181,3 +181,12 @@ function mkdircd()
 export -f mkdircd
 alias cdmkdir="mkdircd"
 alias mcd="mkdircd"
+
+#@brief findName Find all files which filenames contains $1
+#
+#@param $1 string contained in filenames to find
+function findName()
+{
+  find . -name "*$1*"
+}
+export -f findName
