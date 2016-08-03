@@ -180,3 +180,4 @@ function mkdircd()
 }
 export -f mkdircd
 alias cdmkdir="mkdircd"
+alias mcd="mkdircd"
