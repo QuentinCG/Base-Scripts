@@ -51,6 +51,10 @@ echo "Add bashrc and bash_profile to $username user"
 sudo chmod 755 ../bash/install.sh
 ../bash/install.sh /home/"$username"
 
+echo "------------------ Install SSH ------------------"
+#echo "At least one of the package should install itself"
+fastInstall ssh #openssh-server openssh-client
+
 echo "------------ Disable ssh root access ------------"
 replaceLineOrAddEndFile /etc/ssh/sshd_config "#PermitRootLogin" "PermitRootLogin no"
 
