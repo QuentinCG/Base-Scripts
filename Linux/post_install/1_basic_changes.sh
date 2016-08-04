@@ -24,12 +24,16 @@ then
   exit 1
 fi
 
+
 echo "----------------- Install sudo ------------------"
 fastInstall sudo
 echo "If you want to not write your password all the time when"
 echo "using sudo, do : 'sudo visudo' and edit the right line:"
 echo "USERNAME_HERE ALL=(ALL:ALL) NOPASSWD:ALL"
 waitUserAction
+
+echo "--------- Update and upgrade the system ---------"
+updateAndUpgrade
 
 echo "----------------- Add new user ------------------"
 echo "Add a new user (please specify a name):"
@@ -43,7 +47,7 @@ sudo bash -c 'echo "$username ALL=(ALL:ALL) NOPASSWD:ALL" | (EDITOR="tee -a" vis
 
 echo "Add bashrc and bash_profile to $username user"
 sudo chmod 755 ../bash/install.sh
-. ../bash/install.sh /home/"$username"
+../bash/install.sh /home/"$username"
 
 echo "------------ Disable ssh root access ------------"
 replaceLineOrAddEndFile /etc/ssh/sshd_config "#PermitRootLogin" "PermitRootLogin no"
@@ -53,11 +57,9 @@ replaceLineOrAddEndFile /etc/ssh/sshd_config "Port " "Port 50555"
 
 /etc/init.d/ssh restart
 
-echo "--------- Update and upgrade the system ---------"
-updateAndUpgrade
-
 echo "- Install automatic update and upgrade (weekly) -"
 echo "apt-get -y update
 apt-get -y upgrade" | sudo tee /etc/cron.weekly/update_and_upgrade
+sudo chmod 755 /etc/cron.weekly/update_and_upgrade
 
 echo "---------- End of the installation step ---------"
