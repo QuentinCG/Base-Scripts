@@ -14,6 +14,9 @@ source ../utils/functions.sh
 echo "-------------- Install Text editors -------------"
 fastInstall vim gedit
 
+echo "------ Install basic file transfer (curl) -------"
+fastInstall curl
+
 echo "------- Install Secure shell file system --------"
 fastInstall sshfs
 
