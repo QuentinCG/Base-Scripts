@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+#@brief ~/.bashrc file (called when a terminal is launched)
+#@author Quentin Comte-Gaz <quentin@comte-gaz.com>
+#@date 4 August 2016
+#@license MIT License (contact me if too restrictive)
+#@copyright Copyright (c) 2016 Quentin Comte-Gaz
+#
+#@note This .bashrc assumes functions.sh, aliases.sh and commands.sh are stored in $PATH_SCRIPTS
+
+# If not running interactively, exit script
+[ -z "$PS1" ] && return
+
+
+# Call generic bashrc (if exists)
+if [ -f /etc/bashrc ]; then
+  source /etc/bashrc
+fi
+
+if [ -f /etc/bash.bashrc ]; then
+  source /etc/bash.bashrc
+fi
+
+
+# Call functions, aliases and commands
+PATH_SCRIPTS="/etc/utils"
+
+if [ -f "$PATH_SCRIPTS"/functions.sh ]; then
+  source "$PATH_SCRIPTS"/functions.sh
+fi
+
+if [ -f "$PATH_SCRIPTS"/aliases.sh ]; then
+  source "$PATH_SCRIPTS"/aliases.sh
+fi
+
+if [ -f "$PATH_SCRIPTS"/commands.sh ]; then
+  source "$PATH_SCRIPTS"/commands.sh
+fi
