@@ -28,7 +28,7 @@ echo "---------------- Add source.list ----------------"
 cp ../files/sources.list /etc/apt/sources.list
 
 echo "----------------- Install sudo ------------------"
-fastInstall sudo
+apt-get install -y -qq sudo
 echo "If you want to not write your password all the time when"
 echo "using sudo, do : 'sudo visudo' and edit the right line:"
 echo "USERNAME_HERE ALL=(ALL:ALL) NOPASSWD:ALL"
