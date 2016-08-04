@@ -24,6 +24,8 @@ then
   exit 1
 fi
 
+echo "---------------- Add source.list ----------------"
+cp ../files/sources.list /etc/apt/sources.list
 
 echo "----------------- Install sudo ------------------"
 fastInstall sudo
