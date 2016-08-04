@@ -191,3 +191,31 @@ function findName()
   find . -name "*$1*"
 }
 export -f findName
+
+#@brief sanitize Make directories and files access rights sane (recursively)
+#
+#@param $@ files/folders to have proper access rights
+function sanitize()
+{
+  chmod -R u=rwX,g=rX,o= "$@";
+}
+
+#@brief netInfo Show network information
+netInfo()
+{
+  /sbin/ifconfig | awk /'inet addr/ {print $2}'
+  echo ""
+  /sbin/ifconfig | awk /'Bcast/ {print $3}'
+  echo ""
+  /sbin/ifconfig | awk /'inet addr/ {print $4}'
+  echo ""
+  /sbin/ifconfig | awk /'HWaddr/ {print $4,$5}'
+}
+
+#@brief showWeather Show weather of city $1
+#
+#@param $1 City name
+showWeather()
+{
+  curl wttr.in/"$1"
+}
