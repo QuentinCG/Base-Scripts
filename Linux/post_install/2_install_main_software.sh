@@ -57,7 +57,7 @@ echo "--------------- Install cmd jokes ---------------"
 fastInstall fortune
 
 echo "--------------- Project Management --------------"
-fastInstall git git-gui gitk mercurial
+fastInstall git-core git git-gui gitk mercurial
 echo "In git gui, the 'Loose Object' popup will never be displayed."
 git config --global gui.gcwarning false
 
