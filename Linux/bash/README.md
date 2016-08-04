@@ -6,7 +6,7 @@ or when a terminal is launched.
 # How to install
 
 Launch this script:
-'''shell
+```shell
 chmod 750 install.sh
 ./install.sh
-'''
+```
