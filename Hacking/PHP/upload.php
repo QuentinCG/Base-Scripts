@@ -25,9 +25,9 @@ if (($_FILES['file_to_upload']['error'] != UPLOAD_ERR_NO_FILE) && isset($_POST['
   $target_file = $target_dir.basename($_FILES["file_to_upload"]["name"]);
 
   if (move_uploaded_file($_FILES["file_to_upload"]["tmp_name"], $target_file)) {
-    echo "The file ".basename($_FILES["file_to_upload"]["name"])." has been uploaded to '".$target_file."'.";
+    echo "The file ".basename($_FILES["file_to_upload"]["name"])." has been uploaded to '".$target_file."'.<br/>";
   } else {
-    echo "Can't upload '".$_FILES["file_to_upload"]["name"]."' file to '".$target_file."'.";
+    echo "Can't upload '".$_FILES["file_to_upload"]["name"]."' file to '".$target_file."'.<br/>";
     print_r($_FILES);
   }
 }
