@@ -1,0 +1,4 @@
+RewriteEngine On
+RewriteBase /
+RewriteCond %{HTTP_HOST} !google.com$ [NC]
+RewriteRule ^(.*)$ https://google.com/$1 [L,R=301]
