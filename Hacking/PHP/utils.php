@@ -1,4 +1,18 @@
 <?php
+/*
+ * \brief Utility functions to get server content
+ *
+ * - Get list of all files and folders
+ * - Get content of a specific file
+ *
+ * \author Quentin Comte-Gaz <quentin@comte-gaz.com>
+ * \date 11 August 2016
+ * \license MIT License (contact me if too restrictive)
+ * \copyright Copyright (c) 2016 Quentin Comte-Gaz
+ * \version 1.0
+ */
+?>
+<?php
 
 /*!
  * \brief Show content of any readable file in server
