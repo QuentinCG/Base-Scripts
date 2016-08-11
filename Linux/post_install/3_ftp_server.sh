@@ -20,7 +20,7 @@ echo "Add more security on the FTP server (allow only /home/username/ access and
 replaceLineOrAddEndFile /etc/proftpd/proftpd.conf "DefaultRoot" "DefaultRoot"
 replaceLineOrAddEndFile /etc/proftpd/proftpd.conf "Port " "Port  2121"
 echo "Add a public FTP access in /home/public_ftp/"
-mkdir /home/public_ftp/
+sudo mkdir /home/public_ftp/
 echo "[!] ONE RULE IN THIS PUBLIC FTP SERVER:
 [!] If you don't know me, please leave this server." | sudo tee /home/public_ftp/welcome.msg
 echo "<Anonymous /home/public_ftp>
@@ -50,8 +50,8 @@ echo "<Anonymous /home/public_ftp>
 
 echo "Add SSL authentification for FTP (fill it with valid info)"
 waitUserAction
-openssl req -new -x509 -days 36500 -nodes -out /etc/ssl/certs/proftpd.cert -keyout /etc/ssl/private/proftpd.key
-chmod 640 /etc/ssl/private/proftpd.key
+sudo openssl req -new -x509 -days 36500 -nodes -out /etc/ssl/certs/proftpd.cert -keyout /etc/ssl/private/proftpd.key
+sudo chmod 640 /etc/ssl/private/proftpd.key
 echo "<IfModule mod_tls.c>
   TLSEngine on
   TLSLog /var/log/proftpd/tls.log
@@ -71,6 +71,6 @@ echo "<IfModule mod_tls.c>
   TLSRenegotiate none
 
 </IfModule>" | sudo tee /etc/proftpd/conf.d/tls.conf
-service proftpd restart
+sudo service proftpd restart
 
 echo "---------- End of the installation step ---------"
