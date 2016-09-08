@@ -91,4 +91,21 @@ else
   echo "Impossible to configure X11 server (normal if not using ssh)"
 fi
 
+echo "------------ Install VirtualBox guest -----------"
+echo "Do you use Linux as a VirtualBox guest?"
+select yn in "Yes" "No"; do
+  case $yn in
+    Yes ) replaceLineOrAddEndFile /etc/apt/sources.list "deb http://download.virtualbox.org/virtualbox/debian " "deb http://download.virtualbox.org/virtualbox/debian jessie contrib non-free";
+          wget -q http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc -O- | apt-key add -;
+          updateAndUpgrade
+          fastInstall build-essential module-assistant;
+          echo "Please insert Guest Additions CD";
+          waitUserAction;
+          sh /media/cdrom/VBoxLinuxAdditions.run;
+          break;;
+    No ) echo "No need to install VirtualBox packages";
+         break;;
+  esac
+done
+
 echo "---------- End of the installation step ---------"
