@@ -75,6 +75,7 @@ fastInstall transmission deluge rtorrent
 
 echo "---------------- Install X-server ---------------"
 fastInstall xauth
+X11CONFIG="/etc/ssh/sshd_config"
 if [ -e "$X11CONFIG" ]; then
   replaceLineOrAddEndFile $X11CONFIG "AllowTcpForwarding " "AllowTcpForwarding yes"
   replaceLineOrAddEndFile $X11CONFIG "X11Forwarding " "X11Forwarding yes"
@@ -82,13 +83,13 @@ if [ -e "$X11CONFIG" ]; then
   replaceLineOrAddEndFile $X11CONFIG "X11UseLocalhost " "X11UseLocalhost yes"
   replaceLineOrAddEndFile $X11CONFIG "AddressFamily " "AddressFamily inet"
   fastInstall x11-apps
-  echo "X-Server created, please launch X11-client in your computer"
+  echo "X-Server created, please launch X11-client in your computer if you use SSH"
   waitUserAction
   echo "A clock should soon appear in your screen. If not, something went wrong"
   xclock &
   waitUserAction
 else
-  echo "Impossible to configure X11 server (normal if not using ssh)"
+  echo "Impossible to configure X11 server (no SSH installed)"
 fi
 
 echo "------------ Install VirtualBox guest -----------"
