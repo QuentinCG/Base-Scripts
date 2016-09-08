@@ -26,6 +26,8 @@ fi
 
 echo "---------------- Add source.list ----------------"
 cp ../files/sources.list /etc/apt/sources.list
+echo "Adding certificate for Mozilla depo"
+wget -q http://mozilla.debian.net/archive.asc -O- | apt-key add -
 
 echo "----------------- Install sudo ------------------"
 apt-get install -y -qq sudo
