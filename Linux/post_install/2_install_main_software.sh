@@ -54,7 +54,7 @@ fastInstall dos2unix
 #fastInstall irssi
 
 echo "--------------- Install compilers ---------------"
-fastInstall cmake make
+fastInstall cmake make gcc
 
 echo "--------------- Install cmd jokes ---------------"
 fastInstall fortune
