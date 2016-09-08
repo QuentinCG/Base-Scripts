@@ -68,7 +68,7 @@ echo "In git gui, the 'Loose Object' popup will never be displayed."
 git config --global gui.gcwarning false
 
 echo "---------------- FTP Management -----------------"
-fastInstall lftp
+fastInstall lftp filezilla
 
 echo "---------------- Torrent clients ----------------"
 fastInstall transmission deluge rtorrent
