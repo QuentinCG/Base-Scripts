@@ -46,17 +46,16 @@ if [ ! -z "$username" ]; then
   sudo adduser --home /home/"$username" "$username"
   sudo chown "$username":"$username" /home/"$username"
   sudo chmod 755 /home/"$username"
+
+  echo "Add $username user to sudoers"
+  sudo bash -c 'echo "$username ALL=(ALL:ALL) NOPASSWD:ALL" | (EDITOR="tee -a" visudo)'
+
+  echo "Add bashrc and bash_profile to $username user"
+  sudo chmod 755 ../bash/install.sh
+  ../bash/install.sh /home/"$username"
 else
   echo "No user added (none selected)"
 fi
-
-
-echo "Add $username user to sudoers"
-sudo bash -c 'echo "$username ALL=(ALL:ALL) NOPASSWD:ALL" | (EDITOR="tee -a" visudo)'
-
-echo "Add bashrc and bash_profile to $username user"
-sudo chmod 755 ../bash/install.sh
-../bash/install.sh /home/"$username"
 
 echo "------------------ Install SSH ------------------"
 #echo "At least one of the package should install itself"
