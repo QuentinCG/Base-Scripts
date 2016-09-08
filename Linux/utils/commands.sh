@@ -23,3 +23,6 @@ export PS1="____________________________________________________________________
 if [ -f /etc/bash_completion ]; then
   source /etc/bash_completion
 fi
+
+# Add "sbin/" to PATH
+export PATH=$PATH:/sbin
