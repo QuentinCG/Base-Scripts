@@ -42,9 +42,14 @@ updateAndUpgrade
 echo "----------------- Add new user ------------------"
 echo "Add a new user (please specify a name):"
 read username
-sudo adduser --home /home/"$username" "$username"
-sudo chown "$username":"$username" /home/"$username"
-sudo chmod 755 /home/"$username"
+if [ ! -z "$username" ]; then
+  sudo adduser --home /home/"$username" "$username"
+  sudo chown "$username":"$username" /home/"$username"
+  sudo chmod 755 /home/"$username"
+else
+  echo "No user added (none selected)"
+fi
+
 
 echo "Add $username user to sudoers"
 sudo bash -c 'echo "$username ALL=(ALL:ALL) NOPASSWD:ALL" | (EDITOR="tee -a" visudo)'
