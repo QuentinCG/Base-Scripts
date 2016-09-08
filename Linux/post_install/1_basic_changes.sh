@@ -58,7 +58,7 @@ fastInstall ssh #openssh-server openssh-client
 echo "------------ Disable ssh root access ------------"
 replaceLineOrAddEndFile /etc/ssh/sshd_config "#PermitRootLogin" "PermitRootLogin no"
 
-echo "-----Use port 50555 for SSH connexion-------"
+echo "------ Use port 50555 for SSH connexion ---------"
 replaceLineOrAddEndFile /etc/ssh/sshd_config "Port " "Port 50555"
 
 /etc/init.d/ssh restart
