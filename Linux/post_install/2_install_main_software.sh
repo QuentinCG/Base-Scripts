@@ -56,6 +56,9 @@ fastInstall dos2unix
 echo "--------------- Install compilers ---------------"
 fastInstall cmake make gcc
 
+echo "------------ Install Perl and Python ------------"
+fastInstall perl python python2.7 python3
+
 echo "--------------- Install cmd jokes ---------------"
 fastInstall fortune
 
