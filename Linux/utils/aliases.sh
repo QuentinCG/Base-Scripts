@@ -66,3 +66,6 @@ alias myIp="curl ipinfo.io/ip"
 alias update="apt-get update"
 alias upgrade="apt-get upgrade"
 #alias install="apt-get install" # (already in functions)
+
+# Network config
+alias ipconfig='ifconfig'
