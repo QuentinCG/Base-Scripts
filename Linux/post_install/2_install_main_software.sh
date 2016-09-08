@@ -27,7 +27,7 @@ echo "Use '/etc/init.d/fail2ban restart' to restart fail2ban"
 
 echo "---------- Install security NMAP check ----------"
 fastInstall nmap
-echo "Use 'nmap -sT -0 localhost' to check open port"
+echo "Use 'nmap -sT -O localhost' to check open port"
 
 echo "---------- Install htop (memory check) ----------"
 fastInstall htop
@@ -85,7 +85,7 @@ if [ -e "$X11CONFIG" ]; then
   xclock &
   waitUserAction
 else
-  echo "ERROR: IMPOSSIBLE TO CONFIGURE X11 SERVER!"
+  echo "Impossible to configure X11 server (normal if not using ssh)"
 fi
 
 echo "---------- End of the installation step ---------"

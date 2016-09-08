@@ -26,7 +26,7 @@ echo "[!] ONE RULE IN THIS PUBLIC FTP SERVER:
 echo "<Anonymous /home/public_ftp>
   User  ftp
   Group  nogroup
-  # We want clients to be able to login with "anonymous" as well as "ftp"
+  # We want clients to be able to login with \"anonymous\" as well as \"ftp\"
   UserAlias  anonymous ftp
   # Cosmetic changes, all files belongs to ftp user
   DirFakeUser on ftp
