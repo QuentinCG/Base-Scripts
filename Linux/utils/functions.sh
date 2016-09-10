@@ -94,6 +94,9 @@ export -f install
 
 #@brief updateAndUpgrade Update and upgrade the system without human interaction
 function updateAndUpgrade(){
+  # Make sure certificate keys are up-to-date
+  sudo apt-key update
+  # Update and upgrade
   sudo apt-get update --yes
   sudo apt-get dist-upgrade --yes
 }
