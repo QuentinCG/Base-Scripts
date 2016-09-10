@@ -70,7 +70,8 @@ replaceLineOrAddEndFile /etc/ssh/sshd_config "Port " "Port 50555"
 /etc/init.d/ssh restart
 
 echo "- Install automatic update and upgrade (weekly) -"
-echo "apt-get -y update
+echo "apt-key update
+apt-get -y update
 apt-get -y upgrade" | sudo tee /etc/cron.weekly/update_and_upgrade
 sudo chmod 755 /etc/cron.weekly/update_and_upgrade
 
