@@ -40,7 +40,7 @@ echo "--------- Update and upgrade the system ---------"
 updateAndUpgrade
 
 echo "----------------- Add new user ------------------"
-echo "Add a new user (please specify a name):"
+echo "Add a new user (please specify a name if you want a new user):"
 read username
 if [ ! -z "$username" ]; then
   sudo adduser --home /home/"$username" "$username"
@@ -69,10 +69,10 @@ replaceLineOrAddEndFile /etc/ssh/sshd_config "Port " "Port 50555"
 
 /etc/init.d/ssh restart
 
-echo "- Install automatic update and upgrade (weekly) -"
-echo "apt-key update
-apt-get -y update
-apt-get -y upgrade" | sudo tee /etc/cron.weekly/update_and_upgrade
-sudo chmod 755 /etc/cron.weekly/update_and_upgrade
+echo "- Install automatic update and upgrade (daily) -"
+echo "/usr/bin/apt-key update
+/usr/bin/apt-get -q -y update
+/usr/bin/apt-get -q -y upgrade" | sudo tee /etc/cron.daily/update_and_upgrade
+sudo chmod 755 /etc/cron.daily/update_and_upgrade
 
 echo "---------- End of the installation step ---------"
