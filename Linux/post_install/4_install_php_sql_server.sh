@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 #@brief Post install step 4:
-#  - Install Apache/PHP/SQL server
+#  - Install Apache and SQL server
+#  - Install PHP5 support
+#  - Install PHPMyAdmin
 #
 #@author Quentin Comte-Gaz <quentin@comte-gaz.com>
 #@date 22 February 2017
