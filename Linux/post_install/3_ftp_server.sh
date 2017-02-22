@@ -18,7 +18,7 @@ waitUserAction
 install proftpd openssl
 echo "Add more security on the FTP server (allow only /home/username/ access and use port 2121)"
 replaceLineOrAddEndFile /etc/proftpd/proftpd.conf "DefaultRoot" "DefaultRoot  ~"
-replaceLineOrAddEndFile /etc/proftpd/proftpd.conf "Port " "Port  2121"
+replaceLineOrAddEndFile /etc/proftpd/proftpd.conf "Port" "Port  2121"
 echo "Add a public FTP access in /home/public_ftp/"
 sudo mkdir /home/public_ftp/
 echo "[!] ONE RULE IN THIS PUBLIC FTP SERVER:

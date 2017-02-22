@@ -12,12 +12,12 @@
 
 source ../utils/functions.sh
 
-APACHE_SECURIY = "/etc/apache2/apache2.conf" #"/etc/apache2/conf.d/security"
-APACHE_DIR = "/var/www"
-PHPMYADMIN_PATH = "$APACHE_DIR/phpmyadmin"
+APACHE_SECURIY="/etc/apache2/apache2.conf" #"/etc/apache2/conf.d/security"
+APACHE_DIR="/var/www"
+PHPMYADMIN_PATH="$APACHE_DIR/phpmyadmin"
 
-PHPMYADMIN_ADDRESS = "phpmyadmin.comte-gaz.com"
-PHPMYADMIN_MAIL = "phpmyadmin@comte-gaz.com"
+PHPMYADMIN_ADDRESS="phpmyadmin.comte-gaz.com"
+PHPMYADMIN_MAIL="phpmyadmin@comte-gaz.com"
 
 echo "--------------------------------------------"
 echo "---------Install PHP & SQL server-----------"
