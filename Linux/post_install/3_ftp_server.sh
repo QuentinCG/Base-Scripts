@@ -46,7 +46,7 @@ echo "<Anonymous /home/public_ftp>
       DenyAll
     </Limit>
   </Directory>
-</Anonymous>" | sudo tee /etc/proftpd/proftpd.conf
+</Anonymous>" >> /etc/proftpd/proftpd.conf
 
 echo "Add SSL authentification for FTP (fill it with valid info)"
 waitUserAction
