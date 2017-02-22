@@ -70,7 +70,7 @@ echo "<VirtualHost *:80>
 	DocumentRoot $PHPMYADMIN_PATH
 
 	# Website options (<=>.htaccess)
-	<Directory $PHPMYADMIN_PATHn>
+	<Directory $PHPMYADMIN_PATH>
 		#Allow everybody to see the website
 		Order allow,deny
 		allow from all
