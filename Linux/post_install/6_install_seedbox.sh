@@ -33,6 +33,7 @@ sudo service transmission-daemon stop
 sudo usermod -a -G debian-transmission $SEEDBOX_USERNAME
 sudo mkdir /home/$SEEDBOX_USERNAME/incomplete
 sudo chown -R $SEEDBOX_USERNAME:debian-transmission /home/$SEEDBOX_USERNAME
+sudo chmod -R 775 /home/$SEEDBOX_USERNAME
 
 echo "---------Configuring seedbox----------"
 
