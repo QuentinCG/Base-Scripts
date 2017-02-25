@@ -36,26 +36,27 @@ sudo chown -R $SEEDBOX_USERNAME:debian-transmission /home/$SEEDBOX_USERNAME
 sudo chmod -R 775 /home/$SEEDBOX_USERNAME
 
 echo "---------Configuring seedbox----------"
-
-echo '
+echo "
 {
-  "alt-speed-down": 7000,            // KB/s
-  "alt-speed-enabled": true,
-  "alt-speed-time-day": 127,         // 127(10)=1111111(2) (one 1 for each day of the week)
-  "alt-speed-time-enabled": true,
-  "alt-speed-up": 7000              // KB/s
-  "download-dir": "/home/$SEEDBOX_USERNAME",
-  "incomplete-dir": "/home/$SEEDBOX_USERNAME/incomplete",
-  "incomplete-dir-enabled": true,
-  "rpc-authentication-required": true,
-  "rpc-enabled": true
-  "rpc-password": "$SEEDBOX_PASSWORD",
-  "rpc-port": $SEEDBOX_PORT,
-  "rpc-url": "/",
-  "rpc-username": "$SEEDBOX_LOGIN",
-  "ratio-limit": 20,
-  "ratio-limit-enabled": false,
-}' | sudo tee /etc/transmission-daemon/settings.json
+  'blocklist-enabled': false,
+  'rpc-whitelist-enabled': false,
+  'alt-speed-down': 7000,            // KB/s
+  'alt-speed-enabled': true,
+  'alt-speed-time-day': 127,         // 127(10)=1111111(2) (one 1 for each day of the week)
+  'alt-speed-time-enabled': true,
+  'alt-speed-up': 7000               // KB/s
+  'download-dir': '/home/$SEEDBOX_USERNAME',
+  'incomplete-dir': '/home/$SEEDBOX_USERNAME/incomplete',
+  'incomplete-dir-enabled': true,
+  'rpc-authentication-required': true,
+  'rpc-enabled': true
+  'rpc-password': '$SEEDBOX_PASSWORD',
+  'rpc-port': $SEEDBOX_PORT,
+  'rpc-url': '/transmission/',
+  'rpc-username': '$SEEDBOX_LOGIN',
+  'ratio-limit': 20,
+  'ratio-limit-enabled': false,
+}" | sudo tee /etc/transmission-daemon/settings.json
 
 echo "---------Restarting seedbox----------"
 sudo service transmission-daemon reload
