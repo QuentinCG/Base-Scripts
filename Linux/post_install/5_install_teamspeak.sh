@@ -16,7 +16,6 @@ source ../utils/functions.sh
 TEAMSPEAK_USERNAME="teamspeak"
 TEAMSPEAK_SERVER_FOLDER_NAME="teamspeak3-server"
 TEAMSPEAK_SERVER_VERSION="3.0.13.6"
-TEAMSPEAK_USER_ACCESS="su -u $TEAMSPEAK_USERNAME"
 
 addNewLinuxUser $TEAMSPEAK_USERNAME $WITH_NORMAL_SHELL
 
@@ -26,12 +25,12 @@ extract teamspeak3-server_linux_amd64-$TEAMSPEAK_SERVER_VERSION.tar.bz2
 mv teamspeak3-server_linux_amd64 $TEAMSPEAK_SERVER_FOLDER_NAME
 chmod -R 755 $TEAMSPEAK_SERVER_FOLDER_NAME
 
-$TEAMSPEAK_USER_ACCESS /home/$TEAMSPEAK_USERNAME/$TEAMSPEAK_SERVER_FOLDER_NAME/ts3server_startscript.sh start
+runuser -l $TEAMSPEAK_USERNAME -c "/home/$TEAMSPEAK_USERNAME/$TEAMSPEAK_SERVER_FOLDER_NAME/ts3server_startscript.sh start"
 
 echo "---------Please SAVE the ID and TOKEN printed in the screen------------"
 waitUserAction
 
 echo "---------Please add this command to crontab:------------"
-echo "@reboot cd /home/teamspeak/teamspeak3/ && ./ts3server_startscript.sh start"
+echo "@reboot cd /home/$TEAMSPEAK_USERNAME/$TEAMSPEAK_SERVER_FOLDER_NAME && ./ts3server_startscript.sh start"
 waitUserAction
-$TEAMSPEAK_USER_ACCESS crontab -e
+runuser -l $TEAMSPEAK_USERNAME -c 'crontab -e'
