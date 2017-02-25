@@ -3,7 +3,7 @@
 #@brief Post install step 5:
 #  - Install teamspeak
 #
-# This script must be called by a sudoer user (used only for teamspeak if possible)
+# This script must be called by root user
 #
 #@author Quentin Comte-Gaz <quentin@comte-gaz.com>
 #@date 25 February 2017
@@ -17,8 +17,10 @@ TEAMSPEAK_USERNAME="teamspeak"
 TEAMSPEAK_SERVER_FOLDER_NAME="teamspeak3-server"
 TEAMSPEAK_SERVER_VERSION="3.0.13.6"
 
+echo "---------Adding teamspeak user----------"
 addNewLinuxUser $TEAMSPEAK_USERNAME $WITH_NORMAL_SHELL
 
+echo "---------Installing teamspeak----------"
 cd /home/$TEAMSPEAK_USERNAME
 wget http://teamspeak.gameserver.gamed.de/ts3/releases/$TEAMSPEAK_SERVER_VERSION/teamspeak3-server_linux_amd64-$TEAMSPEAK_SERVER_VERSION.tar.bz2
 extract teamspeak3-server_linux_amd64-$TEAMSPEAK_SERVER_VERSION.tar.bz2
