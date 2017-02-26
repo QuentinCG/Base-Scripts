@@ -24,6 +24,7 @@ echo "---------Installing teamspeak----------"
 cd /home/$TEAMSPEAK_USERNAME
 wget http://teamspeak.gameserver.gamed.de/ts3/releases/$TEAMSPEAK_SERVER_VERSION/teamspeak3-server_linux_amd64-$TEAMSPEAK_SERVER_VERSION.tar.bz2
 extract teamspeak3-server_linux_amd64-$TEAMSPEAK_SERVER_VERSION.tar.bz2
+rm teamspeak3-server_linux_amd64-$TEAMSPEAK_SERVER_VERSION.tar.bz2
 mv teamspeak3-server_linux_amd64 $TEAMSPEAK_SERVER_FOLDER_NAME
 chmod -R 755 $TEAMSPEAK_SERVER_FOLDER_NAME
 
