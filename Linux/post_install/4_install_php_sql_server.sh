@@ -24,7 +24,7 @@ echo "---------Install PHP & SQL server-----------"
 echo "--------------------------------------------"
 
 echo "---------Check we have root access----------"
-checkRoot
+isRoot
 
 echo "--------- Update and upgrade the system ---------"
 updateAndUpgrade
