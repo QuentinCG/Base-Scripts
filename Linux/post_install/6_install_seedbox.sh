@@ -21,6 +21,7 @@ SEEDBOX_SERVER_FOLDER_NAME="download"
 SEEDBOX_LOGIN="loginHere"
 SEEDBOX_PASSWORD="myPasswordHere"
 SEEDBOX_PORT=9001
+SEEDBOX_FILES_DOMAIN="files.comte-gaz.com"
 
 echo "---------Adding seedbox user----------"
 addNewLinuxUser $SEEDBOX_USERNAME $WITH_NORMAL_SHELL
@@ -107,3 +108,47 @@ echo "
 
 echo "---------Restarting seedbox----------"
 sudo service transmission-daemon reload
+
+echo "-----Installing web browser for seedbox------"
+cd /home/$SEEDBOX_USERNAME
+wget https://release.larsjung.de/h5ai/h5ai-0.29.0.zip
+extract h5ai-0.29.0.zip
+rm h5ai-0.29.0.zip
+
+echo "-----Adding login and password to protect files access ------"
+echo "---------Please specify '$SEEDBOX_PASSWORD' as password------------"
+waitUserAction
+sudo htdigest -c /home/$SEEDBOX_USERNAME/.htdigest "Access restricted" $SEEDBOX_LOGIN
+
+echo "---Adding the server information: $SEEDBOX_FILES_DOMAIN website:---"
+cd /etc/apache2/sites-available/
+
+echo "<VirtualHost *:80>
+  ServerName  $SEEDBOX_FILES_DOMAIN
+  ServerAlias www.$SEEDBOX_FILES_DOMAIN
+
+  <Directory /home/${SEEDBOX_USERNAME}>
+    # Allow to show folder content
+    Options +Indexes
+
+    # Folder requiring ID and password
+    AuthType Digest
+    AuthName \"Access restricted\"
+    AuthDigestProvider file
+    AuthUserFile /home/${SEEDBOX_USERNAME}/.htdigest
+    Require valid-user
+
+    # On surcharge l'interface Apache avec h5ai
+    DirectoryIndex index.html index.php /_h5ai/server/php/index.php
+  </Directory>
+
+  CustomLog /dev/null \"combined\"
+  ErrorLog ${APACHE_LOG_DIR}/dl-error.log
+</VirtualHost>" > files.conf
+
+echo "Enabling the new website"
+a2ensite files.conf
+
+echo "Restarting Apache2"
+service apache2 reload
+/etc/init.d/apache2 restart
