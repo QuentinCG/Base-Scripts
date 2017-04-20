@@ -14,17 +14,19 @@ __status__ = "Usable for any project"
 
 import smtplib
 import logging
+import sys, getopt
+import ast
 
-def sendEmail(host, port, using_tsl, username, password, from_addr, from_name,
+def sendEmail(host, port, using_tls, username, password, from_addr, from_name,
               to_addresses_and_names, subject, message):
   """Send an email
 
     Keyword arguments:
       host -- (string) Host name (for example: "smtp.gmail.com" for Gmail)
-      port -- (int) SMTP port
-      using_tsl -- (bool) Use encryption (for Gmail account, you also need to check this option: https://myaccount.google.com/lesssecureapps?pli=1)
+      port -- (int) SMTP port (for example: 587 for Gmail secured connection)
+      using_tls -- (bool) Use encryption (for Gmail account, you also need to check this option: https://myaccount.google.com/lesssecureapps?pli=1)
       username -- (string) SMTP username (for example: "test" for Gmail account "test@gmail.com")
-      password -- (string) SMTP password (for example: 587 for Gmail secured connection)
+      password -- (string) SMTP password
       from_addr -- (string) Email address of the sender (for example: "test@gmail.com")
       from_name -- (string) Name of the sender
       to_addresses_and_names -- (table) Table of receiver email addresses and receiver names [[email addr 1, email name 1], ...]
@@ -38,7 +40,7 @@ def sendEmail(host, port, using_tsl, username, password, from_addr, from_name,
   # Initialize the SMTP connection
   server = smtplib.SMTP(host, port)
 
-  if using_tsl:
+  if using_tls:
     server.starttls()
   # Log in to the server
   try:
@@ -91,11 +93,31 @@ def sendEmail(host, port, using_tsl, username, password, from_addr, from_name,
   return return_value
 
 
-def main():
-  """Demo of the email utility functions"""
+################################# HELP FUNCTION ################################
+def __help(filename=__file__):
+  # Help
+  print("HELP (-h, --help): Give information to use the email sender script")
+  print("HOST (-o, --host): Host name (for example: 'smtp.gmail.com' for Gmail)")
+  print("PORT (-p, --port): SMTP port (for example: 587 for Gmail secured connection)")
+  print("USING TLS (-t, --usingTls): Use encryption (for Gmail account, you also need to check this option: https://myaccount.google.com/lesssecureapps?pli=1)")
+  print("USERNAME (-u, --username): SMTP username (for example: 'test' for Gmail account 'test@gmail.com')")
+  print("PASSWORD (-w, --password): SMTP password")
+  print("ADDRESS FROM (-f, --fromAddr): Address from which the email will be sent")
+  print("NAME FROM (-n, --fromName): Name of the email from which the email will be sent")
+  print("RECEIVERS ADDRESS AND NAME (-t, --toAddressesAndNames): Table of receiver email addresses and receiver names (example: [['receiver1@domain.com', 'receiver 1'], ['receiver2@domain.com', 'receiver 2']])")
+  print("SUBJECT (-s, --subject): Email subject")
+  print("MESSAGE (-m, --message): Email message")
+  print("\n\n")
+  print("Example: python send_email.py --host smtp.gmail.com --port 587 --using_tls True --username dummy --password epicPass --fromAddr dummy@gmail.com --fromName Dummmmmyyy --toAddressesAndNames [['receiver1@domain.com', 'receiver 1']] --subject 'Hi' --message 'Wowowowo\nWowowowowowo'")
 
+
+################################# MAIN FUNCTION ###############################
+def main():
+  """Shell Email utility function"""
+
+  # Set the log level (no log will be shown if "logging.CRITICAL" is used)
   logger = logging.getLogger()
-  logger.setLevel(logging.DEBUG)
+  logger.setLevel(logging.CRITICAL)
 
   # Have input() function compatible with python 2+ and 3+
   try:
@@ -103,36 +125,71 @@ def main():
   except NameError:
     pass
 
-  print("\n----------------------------------------------------")
-  print("-----------Email utility functions demo-------------")
-  print("----------------------------------------------------")
+  _host = ""
+  _port = 587
+  _using_tls = True
+  _username = ""
+  _password = ""
+  _from_addr = ""
+  _from_name = ""
+  _to_addresses_and_names = [[]]
+  _subject = ""
+  _message = ""
 
-  print("\n-----------------Send an email--------------------")
-  _host = str(input("Host (smtp.gmail.com for example): "))
-  _port = int(input("Port (587 for example): "))
-  _using_tsl = bool(input("Using TSL (0 for no, 1 for yes): "))
-  _username = str(input("Username: "))
-  _password = str(input("Password: "))
-  _from_addr = str(input("Sender address: "))
-  _from_name = str(input("Sender name: "))
-  _to_address = str(input("Receiver address: "))
-  _to_name = str(input("Receiver name: "))
-  _subject =str(input("Subject: "))
-  _message = str(input("Message: "))
-  print("Send email: {}".format(sendEmail(host=_host,
-                                          port=_port,
-                                          using_tsl=_using_tsl,
-                                          username=_username,
-                                          password=_password,
-                                          from_addr=_from_addr,
-                                          from_name=_from_name,
-                                          to_addresses_and_names=[[_to_address, _to_name]],
-                                          subject=_subject,
-                                          message=_message)))
+  # Get options
+  try:
+    opts, args = getopt.getopt(sys.argv[1:], "o:p:t:u:w:f:n:t:s:m:",
+                               ["host=", "port=", "usingTls=", "username=", "password=",
+                                "fromAddr=", "fromName=", "toAddressesAndNames=", "subject=", "message="])
+  except getopt.GetoptError as err:
+    print("[ERROR] "+str(err))
+    __help()
+    sys.exit(1)
 
-  print("\n----------------------------------------------------")
-  print("-------------------End of demo----------------------")
-  print("----------------------------------------------------\n")
+  # Show help (if requested)
+  for o, a in opts:
+    if o in ("-h", "--help"):
+      __help()
+      sys.exit(0)
+
+  # Get base parameters
+  for o, a in opts:
+    if o in ("-o", "--host"):
+      _host = str(a)
+      continue
+    if o in ("-p", "--port"):
+      port = int(a)
+      continue
+    if o in ("-t", "--usingTls"):
+      _using_tls = bool(a)
+      continue
+    if o in ("-u", "--username"):
+      _username = str(a)
+      continue
+    if o in ("-w", "--password"):
+      _password = str(a)
+      continue
+    if o in ("-f", "--fromAddr"):
+      _from_addr = str(a)
+      continue
+    if o in ("-n", "--fromName"):
+      _from_name = str(a)
+      continue
+    if o in ("-t", "--toAddressesAndNames"):
+      _to_addresses_and_names = ast.literal_eval(a)
+      continue
+    if o in ("-s", "--subject"):
+      _subject = str(a)
+      continue
+    if o in ("-m", "--message"):
+      _message = str(a)
+      continue
+
+  return_value = sendEmail(host=_host, port=_port, using_tls=_using_tls, username=_username,
+                           password=_password, from_addr=_from_addr, from_name=_from_name,
+                           to_addresses_and_names=_to_addresses_and_names, subject=_subject,
+                           message=_message)
+  print("Send email: {}".format(str(return_value)))
 
 if __name__ == "__main__":
     main()
