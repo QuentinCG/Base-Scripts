@@ -8,17 +8,23 @@ __author__ = 'Quentin Comte-Gaz'
 __email__ = "quentin@comte-gaz.com"
 __license__ = "MIT License"
 __copyright__ = "Copyright Quentin Comte-Gaz (2017)"
-__python_version__ = "2.7+ and 3.+"
+__python_version__ = "3.+"
 __version__ = "1.0 (2017/04/19)"
 __status__ = "Usable for any project"
 
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
+from email.mime.application import MIMEApplication
+from email.utils import formatdate
+from os.path import basename
 import smtplib
 import logging
 import sys, getopt
 import ast
 
 def sendEmail(host, port, using_tls, username, password, from_addr, from_name,
-              to_addresses_and_names, subject, message):
+              to_addresses_and_names, subject, message, images=[], attachements=[]):
   """Send an email
 
     Keyword arguments:
@@ -32,6 +38,8 @@ def sendEmail(host, port, using_tls, username, password, from_addr, from_name,
       to_addresses_and_names -- (table) Table of receiver email addresses and receiver names [[email addr 1, email name 1], ...]
       subject -- (string) Mail subject
       message -- (string) Mail message
+      images -- (table, optional) Table of path to attachement images ["path/to/img/1.jpg", ...]
+      attachements -- (table, optional) Table of path to attachement files ["path/to/file/1.pdf", ...]
 
   return: (bool) Email sent
   """
@@ -55,8 +63,8 @@ def sendEmail(host, port, using_tls, username, password, from_addr, from_name,
     return_value = False
     logging.warning("No suitable authentication method was found.")
 
-  # Create the message to send
   if return_value:
+    # Create the message to send
     to_addresses = ""
     to_addr_and_names_display = ""
     for addr in to_addresses_and_names:
@@ -66,14 +74,43 @@ def sendEmail(host, port, using_tls, username, password, from_addr, from_name,
       to_addresses += addr[0]
       to_addr_and_names_display += "{}<{}>".format(addr[1], addr[0])
 
-    header  = "From: {}\nTo: {}\nSubject: {}\n\n".format("{}<{}>".format(from_name, from_addr),
-                                                         to_addr_and_names_display,
-                                                         subject)
-    message = header + message
+    msg = MIMEMultipart()
+    msg['Subject'] = subject
+    msg['From'] = "{}<{}>".format(from_name, from_addr)
+    msg['To'] = to_addr_and_names_display
+    msg['Date'] = formatdate(localtime=True)
+    msg.attach(MIMEText(message))
 
+  if return_value:
+    # Attach images if requested
+    if images:
+        for image in images:
+          try:
+            fp = open(image, 'rb')
+            msg.attach(MIMEImage(fp.read()))
+            fp.close()
+          except FileNotFoundError:
+            logging.warning("Image file '{}' not found.".format(image))
+            return_value = False
+
+  if return_value:
+    # Attach attachement files if requested
+    if attachements:
+        for attachement in attachements:
+          try:
+            fp = open(attachement, 'rb')
+            attached_file = MIMEApplication(fp.read(), Name=basename(attachement))
+            attached_file['Content-Disposition'] = 'attachment; filename="%s"' % basename(attachement)
+            msg.attach(attached_file)
+            fp.close()
+          except FileNotFoundError:
+            logging.warning("Attachement file '{}' not found.".format(attachement))
+            return_value = False
+
+  if return_value:
     #Send the email
     try:
-      server.sendmail(from_addr, to_addresses, message)
+      server.send_message(msg)
     except smtplib.SMTP.SMTPRecipientsRefused:
       return_value = False
       logging.warning("All recipients were refused. Nobody got the mail.")
@@ -88,7 +125,7 @@ def sendEmail(host, port, using_tls, username, password, from_addr, from_name,
       logging.warning("The server replied with an unexpected error code.")
 
   # End SMTP connection
-  server.quit()
+  server.close()
 
   return return_value
 
@@ -107,8 +144,10 @@ def __help(filename=__file__):
   print("RECEIVERS ADDRESS AND NAME (-t, --toAddressesAndNames): Table of receiver email addresses and receiver names (example: [['receiver1@domain.com', 'receiver 1'], ['receiver2@domain.com', 'receiver 2']])")
   print("SUBJECT (-s, --subject): Email subject")
   print("MESSAGE (-m, --message): Email message")
+  print("IMAGES (-i, --images): Attachement images")
+  print("ATTACHEMENTS (-a, --attachements): Attachement files")
   print("\n\n")
-  print("Example: python send_email.py --host smtp.gmail.com --port 587 --using_tls True --username dummy --password epicPass --fromAddr dummy@gmail.com --fromName Dummmmmyyy --toAddressesAndNames [['receiver1@domain.com', 'receiver 1']] --subject 'Hi' --message 'Wowowowo\nWowowowowowo'")
+  print("Example: python send_email.py --host \"smtp.gmail.com\" --port 587 --usingTls True --username \"dummy\" --password \"epicPass\" --fromAddr \"dummy@gmail.com\" --fromName \"Dummmmmyyy name\" --toAddressesAndNames \"[['receiver1@domain.com', 'receiver 1']]\" --subject \"Hi\" --message \"Wowowowowowo\" --images \"[\"/tmp/picture.png\"]\" --attachements \"[\"/tmp/dummy_file.pdf\"]\"")
 
 
 ################################# MAIN FUNCTION ###############################
@@ -135,12 +174,15 @@ def main():
   _to_addresses_and_names = [[]]
   _subject = ""
   _message = ""
+  _images = []
+  _attachements = []
 
   # Get options
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "o:p:t:u:w:f:n:t:s:m:",
+    opts, args = getopt.getopt(sys.argv[1:], "o:p:t:u:w:f:n:t:s:m:i:a:",
                                ["host=", "port=", "usingTls=", "username=", "password=",
-                                "fromAddr=", "fromName=", "toAddressesAndNames=", "subject=", "message="])
+                                "fromAddr=", "fromName=", "toAddressesAndNames=", "subject=",
+                                "message=", "images=", "attachements="])
   except getopt.GetoptError as err:
     print("[ERROR] "+str(err))
     __help()
@@ -184,11 +226,17 @@ def main():
     if o in ("-m", "--message"):
       _message = str(a)
       continue
+    if o in ("-a", "--attachements"):
+      _attachements = ast.literal_eval(a)
+      continue
+    if o in ("-i", "--images"):
+      _images = ast.literal_eval(a)
+      continue
 
   return_value = sendEmail(host=_host, port=_port, using_tls=_using_tls, username=_username,
                            password=_password, from_addr=_from_addr, from_name=_from_name,
                            to_addresses_and_names=_to_addresses_and_names, subject=_subject,
-                           message=_message)
+                           message=_message, images=_images, attachements=_attachements)
   print("Send email: {}".format(str(return_value)))
 
 if __name__ == "__main__":
