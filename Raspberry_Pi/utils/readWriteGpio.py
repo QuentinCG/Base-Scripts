@@ -61,7 +61,7 @@ if __name__ == "__main__":
     pull_up_mode = GPIO.PUD_DOWN
     if args.pullUp == "UP":
       pull_up_mode = GPIO.PUD_UP
-      logging.debug("Setting IN mode to PIN {} with pull-down mode.".format(str(args.gpio)))
+      logging.debug("Setting IN mode to PIN {} with pull-up mode.".format(str(args.gpio)))
     else:
       logging.debug("Setting IN mode to PIN {} with pull-down mode.".format(str(args.gpio)))
     GPIO.setup(args.gpio, GPIO.IN, pull_up_down=pull_up_mode)
