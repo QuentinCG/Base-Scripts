@@ -81,8 +81,5 @@ if __name__ == "__main__":
     GPIO.output(args.gpio, output_value)
     logging.debug("PIN set to {}.".format(str(output_value)))
 
-  # Clean all GPIO changes made in this script
-  GPIO.cleanup()
-
   # Quit the program without error
   sys.exit(0)
