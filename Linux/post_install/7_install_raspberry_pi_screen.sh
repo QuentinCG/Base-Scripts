@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#@brief Post install step 6:
+#@brief Post install step 7:
 #  - Install RPI LCD screen
 #
 # This script must be called by root user
