@@ -16,6 +16,9 @@
 
 source ../utils/functions.sh
 
+GITLAB_PORT=1276
+GITLAB_DOMAIN="gitlab.comte-gaz.com"
+
 echo "--------- Update and upgrade the system ----------"
 updateAndUpgrade
 
@@ -28,9 +31,30 @@ install gitlab-ce
 
 echo "-------- Please edit email informations and external URL values ---------"
 echo "-------- GitLab config file will be oppened when after you pressend Enter ---------"
-echo "-------- Note: external_url can be modified from 'xxxx.com' to 'xxxxx.com:port_value' if needed ---------"
+echo "-------- Note: external_url must be modified from 'xxxx.com' to 'xxxxx.com:$GITLAB_PORT' ---------"
 waitUserAction
 vim /etc/gitlab/gitlab.rb
 
 echo "-------- Configuring GitLab ---------"
 sudo gitlab-ctl reconfigure
+
+echo "---------Enable mod for apache proxy with Gitlab port----------"
+sudo a2enmod rewrite proxy proxy_http
+sudo service apache2 restart
+
+echo "---Adding the server information: $GITLAB_DOMAIN website:---"
+cd /etc/apache2/sites-available/
+
+echo "<VirtualHost *:80>
+        ServerName $GITLAB_DOMAIN
+        ServerAlias www.$GITLAB_DOMAIN
+
+        RewriteEngine On
+        RewriteRule ^/$ /web/ [L,R=301]
+
+        ProxyPass / http://127.0.0.1:$GITLAB_PORT/
+        ProxyPassReverse / http://127.0.0.1:$GITLAB_PORT/
+</VirtualHost>" > gitlab.conf
+
+echo "Enabling the new website"
+sudo a2ensite gitlab.conf
