@@ -143,7 +143,7 @@ echo "<VirtualHost *:80>
   </Directory>
 
   CustomLog /dev/null \"combined\"
-  ErrorLog ${APACHE_LOG_DIR}/dl-error.log
+  ErrorLog /var/log/apache2/dl-error.log
 </VirtualHost>" > files.conf
 
 echo "Enabling the new website"
