@@ -22,6 +22,7 @@ SEEDBOX_LOGIN="loginHere"
 SEEDBOX_PASSWORD="myPasswordHere"
 SEEDBOX_PORT=9001
 SEEDBOX_FILES_DOMAIN="files.comte-gaz.com"
+SEEDBOX_TORRENT_DOMAIN="torrent.comte-gaz.com"
 
 echo "---------Installing dependency packages for h5ai----------"
 fastInstall ffmpeg
@@ -118,6 +119,10 @@ echo "
 echo "---------Restarting seedbox----------"
 sudo service transmission-daemon reload
 
+echo "---------Enable mod for apache proxy with seedbox port----------"
+sudo a2enmod rewrite proxy proxy_http
+sudo service apache2 restart
+
 echo "-----Installing web browser for seedbox------"
 cd /home/$SEEDBOX_USERNAME/$SEEDBOX_DOWNLOAD_FOLDER_NAME
 wget https://release.larsjung.de/h5ai/h5ai-0.29.0.zip
@@ -129,7 +134,7 @@ echo "---------Please specify '$SEEDBOX_PASSWORD' as password------------"
 waitUserAction
 sudo htdigest -c /home/$SEEDBOX_USERNAME/.htdigest "Access restricted" $SEEDBOX_LOGIN
 
-echo "---Adding the server information: $SEEDBOX_FILES_DOMAIN website:---"
+echo "---Adding the server information: $SEEDBOX_FILES_DOMAIN and $SEEDBOX_TORRENT_DOMAIN websites:---"
 cd /etc/apache2/sites-available/
 
 echo "<VirtualHost *:80>
@@ -155,8 +160,20 @@ echo "<VirtualHost *:80>
   ErrorLog /var/log/apache2/dl-error.log
 </VirtualHost>" > files.conf
 
+echo "<VirtualHost *:80>
+        ServerName $SEEDBOX_TORRENT_DOMAIN
+        ServerAlias www.$SEEDBOX_TORRENT_DOMAIN
+
+        RewriteEngine On
+        RewriteRule ^/$ /web/ [L,R=301]
+
+        ProxyPass / http://127.0.0.1:$SEEDBOX_PORT/
+        ProxyPassReverse / http://127.0.0.1:$SEEDBOX_PORT/
+</VirtualHost>" > torrent.conf
+
 echo "Enabling the new website"
 sudo a2ensite files.conf
+sudo a2ensite torrent.conf
 
 echo "Restarting Apache2"
 sudo service apache2 reload
