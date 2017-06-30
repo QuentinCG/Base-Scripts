@@ -17,11 +17,20 @@ source ../utils/user_functions.sh
 source ../utils/functions.sh
 
 SEEDBOX_USERNAME="seedbox"
-SEEDBOX_SERVER_FOLDER_NAME="download"
+SEEDBOX_DOWNLOAD_FOLDER_NAME="download"
 SEEDBOX_LOGIN="loginHere"
 SEEDBOX_PASSWORD="myPasswordHere"
 SEEDBOX_PORT=9001
 SEEDBOX_FILES_DOMAIN="files.comte-gaz.com"
+
+echo "---------Installing dependency packages for h5ai----------"
+fastInstall ffmpeg
+fastInstall imagemagick
+fastInstall tar zip
+
+echo "---------Add Digest authentification for Apache---------"
+sudo ln -s /etc/apache2/mods-available/auth_digest.load /etc/apache2/mods-enabled/
+sudo /etc/init.d/apache2 force-reload
 
 echo "---------Adding seedbox user----------"
 addNewLinuxUser $SEEDBOX_USERNAME $WITH_NORMAL_SHELL
@@ -53,7 +62,7 @@ echo "
   \"blocklist-url\": \"http://www.example.com/blocklist\",
   \"cache-size-mb\": 4,
   \"dht-enabled\": true,
-  \"download-dir\": \"/home/$SEEDBOX_USERNAME\",
+  \"download-dir\": \"/home/$SEEDBOX_USERNAME/$SEEDBOX_DOWNLOAD_FOLDER_NAME\",
   \"download-queue-enabled\": true,
   \"download-queue-size\": 5,
   \"encryption\": 1,
@@ -110,7 +119,7 @@ echo "---------Restarting seedbox----------"
 sudo service transmission-daemon reload
 
 echo "-----Installing web browser for seedbox------"
-cd /home/$SEEDBOX_USERNAME
+cd /home/$SEEDBOX_USERNAME/$SEEDBOX_DOWNLOAD_FOLDER_NAME
 wget https://release.larsjung.de/h5ai/h5ai-0.29.0.zip
 extract h5ai-0.29.0.zip
 rm h5ai-0.29.0.zip
@@ -127,7 +136,7 @@ echo "<VirtualHost *:80>
   ServerName  $SEEDBOX_FILES_DOMAIN
   ServerAlias www.$SEEDBOX_FILES_DOMAIN
 
-  <Directory /home/${SEEDBOX_USERNAME}>
+  <Directory /home/${SEEDBOX_USERNAME}/${SEEDBOX_DOWNLOAD_FOLDER_NAME}>
     # Allow to show folder content
     Options +Indexes
 
@@ -147,8 +156,8 @@ echo "<VirtualHost *:80>
 </VirtualHost>" > files.conf
 
 echo "Enabling the new website"
-a2ensite files.conf
+sudo a2ensite files.conf
 
 echo "Restarting Apache2"
-service apache2 reload
-/etc/init.d/apache2 restart
+sudo service apache2 reload
+sudo /etc/init.d/apache2 restart
