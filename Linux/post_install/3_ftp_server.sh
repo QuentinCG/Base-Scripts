@@ -24,10 +24,10 @@ sudo mkdir /home/public_ftp/
 echo "[!] ONE RULE IN THIS PUBLIC FTP SERVER:
 [!] If you don't know me, please leave this server." | sudo tee /home/public_ftp/welcome.msg
 echo "<Anonymous /home/public_ftp>
-  User  ftp
-  Group  nogroup
+  User ftp
+  Group nogroup
   # We want clients to be able to login with \"anonymous\" as well as \"ftp\"
-  UserAlias  anonymous ftp
+  UserAlias anonymous ftp
   # Cosmetic changes, all files belongs to ftp user
   DirFakeUser on ftp
   DirFakeGroup on ftp

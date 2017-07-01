@@ -17,13 +17,13 @@ source ../utils/user_functions.sh
 source ../utils/functions.sh
 
 SEEDBOX_USERNAME="seedbox"
-SEEDBOX_DOWNLOAD_FOLDER_NAME="download"
 
 read -p 'Specify seedbox login: ' SEEDBOX_LOGIN
 read -p 'Specify seedbox password: ' SEEDBOX_PASSWORD
 read -p 'Specify seedbox port (example: 9001): ' SEEDBOX_PORT
 read -p 'Specify seedbox files domain (example: files.comte-gaz.com): ' SEEDBOX_FILES_DOMAIN
 read -p 'Specify seedbox domain (example: torrent.comte-gaz.com): ' SEEDBOX_TORRENT_DOMAIN
+read -p 'Specify seedbox download folder (example: /home/public_ftp/download): ' SEEDBOX_DOWNLOAD_FOLDER_NAME
 
 echo "---------Installing dependency packages for h5ai----------"
 fastInstall ffmpeg
@@ -64,7 +64,7 @@ echo "
   \"blocklist-url\": \"http://www.example.com/blocklist\",
   \"cache-size-mb\": 4,
   \"dht-enabled\": true,
-  \"download-dir\": \"/home/$SEEDBOX_USERNAME/$SEEDBOX_DOWNLOAD_FOLDER_NAME\",
+  \"download-dir\": \"$SEEDBOX_DOWNLOAD_FOLDER_NAME\",
   \"download-queue-enabled\": true,
   \"download-queue-size\": 5,
   \"encryption\": 1,
@@ -125,7 +125,7 @@ sudo a2enmod rewrite proxy proxy_http
 sudo service apache2 restart
 
 echo "-----Installing web browser for seedbox------"
-cd /home/$SEEDBOX_USERNAME/$SEEDBOX_DOWNLOAD_FOLDER_NAME
+cd $SEEDBOX_DOWNLOAD_FOLDER_NAME
 wget https://release.larsjung.de/h5ai/h5ai-0.29.0.zip
 extract h5ai-0.29.0.zip
 rm h5ai-0.29.0.zip
@@ -142,7 +142,7 @@ echo "<VirtualHost *:80>
   ServerName  $SEEDBOX_FILES_DOMAIN
   ServerAlias www.$SEEDBOX_FILES_DOMAIN
 
-  <Directory /home/${SEEDBOX_USERNAME}/${SEEDBOX_DOWNLOAD_FOLDER_NAME}>
+  <Directory ${SEEDBOX_DOWNLOAD_FOLDER_NAME}>
     # Allow to show folder content
     Options +Indexes
 
