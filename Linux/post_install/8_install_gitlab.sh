@@ -59,3 +59,7 @@ echo "<VirtualHost *:80>
 
 echo "Enabling the new website"
 sudo a2ensite gitlab.conf
+
+echo "Restarting Apache2"
+sudo service apache2 reload
+sudo /etc/init.d/apache2 restart
