@@ -125,6 +125,7 @@ sudo a2enmod rewrite proxy proxy_http
 sudo service apache2 restart
 
 echo "-----Installing web browser for seedbox------"
+mkdir $SEEDBOX_DOWNLOAD_FOLDER_NAME
 cd $SEEDBOX_DOWNLOAD_FOLDER_NAME
 wget https://release.larsjung.de/h5ai/h5ai-0.29.0.zip
 extract h5ai-0.29.0.zip
