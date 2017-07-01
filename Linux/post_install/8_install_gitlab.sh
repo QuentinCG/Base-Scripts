@@ -2,6 +2,7 @@
 
 #@brief Post install step 8:
 #  - Install and configure GitLab
+#  - Install website proxy to use GitLab
 #
 # This script must be called by a sudo user
 #
@@ -16,8 +17,8 @@
 
 source ../utils/functions.sh
 
-GITLAB_PORT=1276
-GITLAB_DOMAIN="gitlab.comte-gaz.com"
+read -p 'Specify GitLab port (example: 1276): ' GITLAB_PORT
+read -p 'Specify GitLab domain address (example: gitlab.comte-gaz.com): ' GITLAB_DOMAIN
 
 echo "--------- Update and upgrade the system ----------"
 updateAndUpgrade

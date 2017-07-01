@@ -18,11 +18,12 @@ source ../utils/functions.sh
 
 SEEDBOX_USERNAME="seedbox"
 SEEDBOX_DOWNLOAD_FOLDER_NAME="download"
-SEEDBOX_LOGIN="loginHere"
-SEEDBOX_PASSWORD="myPasswordHere"
-SEEDBOX_PORT=9001
-SEEDBOX_FILES_DOMAIN="files.comte-gaz.com"
-SEEDBOX_TORRENT_DOMAIN="torrent.comte-gaz.com"
+
+read -p 'Specify seedbox login: ' SEEDBOX_LOGIN
+read -p 'Specify seedbox password: ' SEEDBOX_PASSWORD
+read -p 'Specify seedbox port (example: 9001): ' SEEDBOX_PORT
+read -p 'Specify seedbox files domain (example: files.comte-gaz.com): ' SEEDBOX_FILES_DOMAIN
+read -p 'Specify seedbox domain (example: torrent.comte-gaz.com): ' SEEDBOX_TORRENT_DOMAIN
 
 echo "---------Installing dependency packages for h5ai----------"
 fastInstall ffmpeg

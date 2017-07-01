@@ -16,8 +16,8 @@ APACHE_SECURIY="/etc/apache2/apache2.conf" #"/etc/apache2/conf.d/security"
 APACHE_DIR="/var/www"
 PHPMYADMIN_PATH="$APACHE_DIR/phpmyadmin"
 
-PHPMYADMIN_ADDRESS="phpmyadmin.comte-gaz.com"
-PHPMYADMIN_MAIL="phpmyadmin@comte-gaz.com"
+read -p 'Specify phpMyAdmin address (example: phpmyadmin.comte-gaz.com): ' PHPMYADMIN_ADDRESS
+read -p 'Specify phpMyAdmin mail (example: phpmyadmin@comte-gaz.com): ' PHPMYADMIN_MAIL
 
 echo "--------------------------------------------"
 echo "---------Install PHP & SQL server-----------"
