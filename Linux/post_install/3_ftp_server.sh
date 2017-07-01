@@ -15,7 +15,7 @@ source ../utils/functions.sh
 echo "--------------- Install FTP server --------------"
 echo "Choose 'standalone' for the FTP server mode"
 waitUserAction
-install proftpd openssl
+install proftpd-basic openssl
 echo "Add more security on the FTP server (allow only /home/username/ access and use port 2121)"
 replaceLineOrAddEndFile /etc/proftpd/proftpd.conf "DefaultRoot" "DefaultRoot  ~"
 replaceLineOrAddEndFile /etc/proftpd/proftpd.conf "Port" "Port  2121"

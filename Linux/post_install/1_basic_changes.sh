@@ -29,15 +29,17 @@ cp ../files/sources.list /etc/apt/sources.list
 echo "Adding certificate for Mozilla depo"
 wget -q http://mozilla.debian.net/archive.asc -O- | apt-key add -
 
+echo "--------- Update and upgrade the system before installing sudo ---------"
+sudo apt-get update --yes
+sudo apt-get upgrade --yes
+sudo apt-get dist-upgrade --yes
+
 echo "----------------- Install sudo ------------------"
 apt-get install -y -qq sudo
 echo "If you want to not write your password all the time when"
 echo "using sudo, do : 'sudo visudo' and edit the right line:"
 echo "USERNAME_HERE ALL=(ALL:ALL) NOPASSWD:ALL"
 waitUserAction
-
-echo "--------- Update and upgrade the system ---------"
-updateAndUpgrade
 
 echo "----------------- Add new user ------------------"
 echo "Add a new user (please specify a name if you want a new user):"

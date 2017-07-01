@@ -18,6 +18,8 @@ PHPMYADMIN_PATH="$APACHE_DIR/phpmyadmin"
 
 read -p 'Specify phpMyAdmin address (example: phpmyadmin.comte-gaz.com): ' PHPMYADMIN_ADDRESS
 read -p 'Specify phpMyAdmin mail (example: phpmyadmin@comte-gaz.com): ' PHPMYADMIN_MAIL
+read -p 'Specify phpMyAdmin login (example: phpmyadmin): ' PHPMYADMIN_LOGIN
+read -p 'Specify phpMyAdmin password (example: testtest): ' PHPMYADMIN_PASSWORD
 
 echo "--------------------------------------------"
 echo "---------Install PHP & SQL server-----------"
@@ -33,14 +35,12 @@ echo "---------Install Apache----------"
 fastInstall apache2 apache2-utils
 
 echo "---------Install PHP7----------"
-apt-cache search php7
+#apt-cache search php7
 fastInstall php7.0 php7.0-dev php7.0-cli php7.0-common libapache2-mod-php7.0 php7.0-fpm php7.0-bz2 php7.0-gd php7.0-mysql php7.0-json php7.0-curl php7.0-intl php-pear php-imagick php7.0-imap php7.0-mcrypt php-memcache php7.0-ps php-pspell php7.0-recode php7.0-snmp php7.0-sqlite3 php7.0-tidy php7.0-xmlrpc php7.0-xsl
 
 echo "---------Install MySQL server----------"
-echo "We will now install MySQL server (you'll have to write a new SQL password)"
-waitUserAction
-sudo apt-get install mysql-server
-sudo apt-get install mysql-client
+install mysql-server mysql-client
+sudo mysql --user=root mysql -e "CREATE USER '$PHPMYADMIN_LOGIN'@'localhost' IDENTIFIED BY '$PHPMYADMIN_PASSWORD'; GRANT ALL PRIVILEGES ON *.* TO '$PHPMYADMIN_LOGIN'@'localhost' WITH GRANT OPTION; FLUSH PRIVILEGES;"
 echo "MySQL installed"
 
 echo "---------Install PHPMyAdmin----------"
