@@ -1,16 +1,19 @@
-# DEPOTS FOR DEBIAN JESSIE (8.x) ONLY
-
+# DEPOTS FOR DEBIAN STRETCH (9.x) ONLY
 # Official
-deb http://httpredir.debian.org/debian/ jessie main contrib non-free
-
+deb http://httpredir.debian.org/debian/ stretch main contrib non-free
 #Security updates
-deb http://security.debian.org/ jessie/updates main contrib non-free
-
+deb http://security.debian.org/ stretch/updates main contrib non-free
 # Volatile updates
-deb http://httpredir.debian.org/debian/ jessie-updates main contrib non-free
-
+deb http://httpredir.debian.org/debian/ stretch-updates main contrib non-free
 # Backports updates
-deb http://httpredir.debian.org/debian jessie-backports main contrib non-free
+deb http://httpredir.debian.org/debian stretch-backports main contrib non-free
 
-# Firefox updates
-deb http://mozilla.debian.net/ jessie-backports firefox-release
+# DEPOTS FOR DEBIAN JESSIE (8.x) ONLY
+# Official
+#deb http://httpredir.debian.org/debian/ jessie main contrib non-free
+#Security updates
+#deb http://security.debian.org/ jessie/updates main contrib non-free
+# Volatile updates
+#deb http://httpredir.debian.org/debian/ jessie-updates main contrib non-free
+# Backports updates
+#deb http://httpredir.debian.org/debian jessie-backports main contrib non-free
