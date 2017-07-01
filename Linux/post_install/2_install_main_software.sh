@@ -96,7 +96,7 @@ echo "------------ Install VirtualBox guest -----------"
 echo "Do you use Linux as a VirtualBox guest?"
 select yn in "Yes" "No"; do
   case $yn in
-    Yes ) replaceLineOrAddEndFile /etc/apt/sources.list "download.virtualbox.org" "\n# VirtualBox\ndeb http://download.virtualbox.org/virtualbox/debian jessie contrib non-free";
+    Yes ) replaceLineOrAddEndFile /etc/apt/sources.list "download.virtualbox.org" "\n# VirtualBox\ndeb http://download.virtualbox.org/virtualbox/debian stretch contrib non-free";
           wget -q http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc -O- | apt-key add -;
           updateAndUpgrade;
           fastInstall build-essential module-assistant;
