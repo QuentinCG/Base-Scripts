@@ -118,6 +118,7 @@ echo "
 }" | sudo tee /etc/transmission-daemon/settings.json
 
 echo "---------Restarting seedbox----------"
+sudo service transmission-daemon start
 sudo service transmission-daemon reload
 
 echo "---------Enable mod for apache proxy with seedbox port----------"
@@ -131,6 +132,9 @@ wget https://release.larsjung.de/h5ai/h5ai-0.29.0.zip
 extract h5ai-0.29.0.zip
 rm h5ai-0.29.0.zip
 
+chmod -R g+x $SEEDBOX_DOWNLOAD_FOLDER_NAME
+chgrp -R www-data $SEEDBOX_DOWNLOAD_FOLDER_NAME
+
 echo "-----Adding login and password to protect files access ------"
 echo "---------Please specify '$SEEDBOX_PASSWORD' as password------------"
 waitUserAction
@@ -142,6 +146,8 @@ cd /etc/apache2/sites-available/
 echo "<VirtualHost *:80>
   ServerName  $SEEDBOX_FILES_DOMAIN
   ServerAlias www.$SEEDBOX_FILES_DOMAIN
+
+  DocumentRoot $SEEDBOX_DOWNLOAD_FOLDER_NAME
 
   <Directory ${SEEDBOX_DOWNLOAD_FOLDER_NAME}>
     # Allow to show folder content
@@ -155,7 +161,7 @@ echo "<VirtualHost *:80>
     Require valid-user
 
     # On surcharge l'interface Apache avec h5ai
-    DirectoryIndex index.html index.php /_h5ai/server/php/index.php
+    DirectoryIndex index.html index.php /_h5ai/public/index.php
   </Directory>
 
   CustomLog /dev/null \"combined\"
