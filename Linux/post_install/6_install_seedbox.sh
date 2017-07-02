@@ -128,9 +128,23 @@ sudo service apache2 restart
 echo "-----Installing web browser for seedbox------"
 mkdir $SEEDBOX_DOWNLOAD_FOLDER_NAME
 cd $SEEDBOX_DOWNLOAD_FOLDER_NAME
-wget https://release.larsjung.de/h5ai/h5ai-0.29.0.zip
-extract h5ai-0.29.0.zip
-rm h5ai-0.29.0.zip
+
+wget https://raw.githubusercontent.com/alexantr/filemanager/master/filemanager.php
+mv filemanager.php index.php
+echo "---------You'll have to edit file manager file-----------"
+waitUserAction
+vim index.php
+
+# Alternative to considere (pretty but does not allow to upload/delete files)
+#wget https://release.larsjung.de/h5ai/h5ai-0.29.0.zip
+#extract h5ai-0.29.0.zip
+#rm h5ai-0.29.0.zip
+
+# Alternatives to considere (can upload/delete files but not pretty)
+#wget https://raw.githubusercontent.com/jcampbell1/simple-file-manager/master/index.php
+
+# Alternative (does not allow to upload/delete files and not pretty)
+#wget https://raw.githubusercontent.com/marekrei/encode-explorer/master/index.php
 
 chmod -R g+x $SEEDBOX_DOWNLOAD_FOLDER_NAME
 chgrp -R www-data $SEEDBOX_DOWNLOAD_FOLDER_NAME
@@ -161,7 +175,7 @@ echo "<VirtualHost *:80>
     Require valid-user
 
     # On surcharge l'interface Apache avec h5ai
-    DirectoryIndex index.html index.php /_h5ai/public/index.php
+    # DirectoryIndex index.html index.php /_h5ai/public/index.php
   </Directory>
 
   CustomLog /dev/null \"combined\"
