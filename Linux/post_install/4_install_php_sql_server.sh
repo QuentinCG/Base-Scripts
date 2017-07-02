@@ -20,6 +20,7 @@ read -p 'Specify phpMyAdmin address (example: phpmyadmin.comte-gaz.com): ' PHPMY
 read -p 'Specify phpMyAdmin mail (example: phpmyadmin@comte-gaz.com): ' PHPMYADMIN_MAIL
 read -p 'Specify phpMyAdmin login (example: phpmyadmin): ' PHPMYADMIN_LOGIN
 read -p 'Specify phpMyAdmin password (example: testtest): ' PHPMYADMIN_PASSWORD
+read -p 'Specify default website redirection (example: quentin.comte-gaz.com): ' DEFAULT_WEBSITE_REDIRECTION
 
 echo "--------------------------------------------"
 echo "---------Install PHP & SQL server-----------"
@@ -87,6 +88,17 @@ echo "<VirtualHost *:80>
 echo "---------Enable PHPMyAdmin website and restart apache----------"
 echo "Enabling the new website"
 a2ensite phpmyadmin.conf
+
+echo "---------Set the default website redirection----------"
+
+echo "<! DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">
+<html xmlns=\"http://www.w3.org/1999/xhtml\">
+  <head>
+    <meta http-equiv=\"refresh\" content=\"0;URL='http://$DEFAULT_WEBSITE_REDIRECTION'\" />
+  </head>
+  <body>
+  </body>
+</html>" > $APACHE_DIR/html/index.html
 
 echo "Restarting Apache2"
 service apache2 reload
