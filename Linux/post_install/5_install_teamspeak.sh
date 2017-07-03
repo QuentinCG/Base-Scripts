@@ -98,3 +98,10 @@ a2ensite teamspeak.conf
 echo "Restarting Apache2"
 service apache2 reload
 /etc/init.d/apache2 restart
+
+echo "You need to change Server group rights in order to allow access to ts from the website:"
+echo " - Connect to teamspeak using a client"
+echo " - Go to 'autorisations->Guest->Virtual server'"
+echo " - Select 'show names'"
+echo " - Enable b_virtualserver_info_view, b_virtualserver_channel_list and b_virtualserver_client_list"
+waitUserAction
