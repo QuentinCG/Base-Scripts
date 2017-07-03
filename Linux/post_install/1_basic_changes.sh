@@ -72,7 +72,7 @@ replaceLineOrAddEndFile /etc/ssh/sshd_config "Port " "Port 50555"
 /etc/init.d/ssh restart
 
 echo "- Install automatic update and upgrade (daily) -"
-echo "/usr/bin/apt-key update
+echo "#/usr/bin/apt-key update
 /usr/bin/apt-get -q -y update
 /usr/bin/apt-get -q -y upgrade
 dpkg --configure -a" | sudo tee /etc/cron.daily/update_and_upgrade
