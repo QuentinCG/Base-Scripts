@@ -45,7 +45,7 @@ echo "<VirtualHost *:80>
   ServerName  $MAIL_ADDRESS
   ServerAlias www.$MAIL_ADDRESS
 
-  # Stored website\n
+  # Stored website
   DocumentRoot $MAIL_FULL_PATH
 
   # Website options (<=>.htaccess)

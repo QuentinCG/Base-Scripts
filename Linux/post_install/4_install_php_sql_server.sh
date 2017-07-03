@@ -70,7 +70,7 @@ echo "<VirtualHost *:80>
 	ServerName  $PHPMYADMIN_ADDRESS
 	ServerAlias www.$PHPMYADMIN_ADDRESS
 
-	# Stored website\n
+	# Stored website
 	DocumentRoot $PHPMYADMIN_PATH
 
 	# Website options (<=>.htaccess)

@@ -38,7 +38,7 @@ echo "<VirtualHost *:80>
   ServerName  $QUENTIN_ADDRESS
   ServerAlias www.$QUENTIN_ADDRESS
 
-  # Stored website\n
+  # Stored website
   DocumentRoot $QUENTIN_FULL_PATH
 
   # Website options (<=>.htaccess)

@@ -50,7 +50,7 @@ echo "<VirtualHost *:80>
   ServerName  $PERFORMANCE_ADDRESS
   ServerAlias www.$PERFORMANCE_ADDRESS
 
-  # Stored website\n
+  # Stored website
   DocumentRoot $PERFORMANCE_FULL_PATH
 
   # Website options (<=>.htaccess)

@@ -74,7 +74,7 @@ echo "<VirtualHost *:80>
   ServerName  $TEAMSPEAK_ADDRESS
   ServerAlias www.$TEAMSPEAK_ADDRESS
 
-  # Stored website\n
+  # Stored website
   DocumentRoot $TEAMSPEAK_FULL_PATH
 
   # Website options (<=>.htaccess)
