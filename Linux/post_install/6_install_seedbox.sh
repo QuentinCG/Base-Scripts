@@ -149,8 +149,8 @@ rm h5ai-0.29.0.zip
 # Alternative (does not allow to upload/delete files and not pretty)
 #wget https://raw.githubusercontent.com/marekrei/encode-explorer/master/index.php
 
-chmod -R g+x $SEEDBOX_DOWNLOAD_FOLDER_NAME
-chgrp -R www-data $SEEDBOX_DOWNLOAD_FOLDER_NAME
+sudo chmod -R g+x $SEEDBOX_DOWNLOAD_FOLDER_NAME
+sudo chown -R debian-transmission:www-data $SEEDBOX_DOWNLOAD_FOLDER_NAME
 
 echo "-----Adding login and password to protect files access ------"
 echo "---------Please specify '$SEEDBOX_PASSWORD' as password------------"
