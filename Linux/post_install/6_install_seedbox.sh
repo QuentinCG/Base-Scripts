@@ -45,7 +45,9 @@ sudo service transmission-daemon stop
 sudo usermod -a -G debian-transmission $SEEDBOX_USERNAME
 sudo mkdir /home/$SEEDBOX_USERNAME/incomplete
 sudo chown -R $SEEDBOX_USERNAME:debian-transmission /home/$SEEDBOX_USERNAME
+sudo chgrp debian-transmission $SEEDBOX_DOWNLOAD_FOLDER_NAME
 sudo chmod -R 775 /home/$SEEDBOX_USERNAME
+sudo chmod -R 775 /home/$SEEDBOX_DOWNLOAD_FOLDER_NAME
 
 echo "---------Configuring seedbox----------"
 
@@ -129,16 +131,17 @@ echo "-----Installing web browser for seedbox------"
 mkdir $SEEDBOX_DOWNLOAD_FOLDER_NAME
 cd $SEEDBOX_DOWNLOAD_FOLDER_NAME
 
-wget https://raw.githubusercontent.com/alexantr/filemanager/master/filemanager.php
-mv filemanager.php index.php
-echo "---------You'll have to edit file manager file-----------"
-waitUserAction
-vim index.php
-
 # Alternative to considere (pretty but does not allow to upload/delete files)
-#wget https://release.larsjung.de/h5ai/h5ai-0.29.0.zip
-#extract h5ai-0.29.0.zip
-#rm h5ai-0.29.0.zip
+wget https://release.larsjung.de/h5ai/h5ai-0.29.0.zip
+extract h5ai-0.29.0.zip
+rm h5ai-0.29.0.zip
+
+# Alternative to considere (can upload/delete files but not pretty)
+#wget https://raw.githubusercontent.com/alexantr/filemanager/master/filemanager.php
+#mv filemanager.php index.php
+#echo "---------You'll have to edit file manager file-----------"
+#waitUserAction
+#vim index.php
 
 # Alternatives to considere (can upload/delete files but not pretty)
 #wget https://raw.githubusercontent.com/jcampbell1/simple-file-manager/master/index.php
@@ -175,7 +178,7 @@ echo "<VirtualHost *:80>
     Require valid-user
 
     # On surcharge l'interface Apache avec h5ai
-    # DirectoryIndex index.html index.php /_h5ai/public/index.php
+    DirectoryIndex index.html index.php /_h5ai/public/index.php
   </Directory>
 
   CustomLog /dev/null \"combined\"
