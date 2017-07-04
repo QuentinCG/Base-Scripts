@@ -16,7 +16,7 @@ source ../utils/functions.sh
 echo "--------- Update and upgrade the system ----------"
 updateAndUpgrade
 
-echo "--------- Installing GitLab dependencies ----------"
+echo "--------- Installing Let's Encrypt dependencies ----------"
 fastInstall git
 
 echo "-------- Download Let's Encrypt ---------"
