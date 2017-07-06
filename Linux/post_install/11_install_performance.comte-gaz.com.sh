@@ -24,7 +24,7 @@ updateAndUpgrade
 
 echo "--------- Install $PERFORMANCE_ADDRESS website ---------"
 cd $APACHE_DIR
-git clone https://github.com/shevabam/ezservermonitor-web.git
+git clone https://github.com/QuentinCG/ezservermonitor-web.git
 mv ezservermonitor-web $PERFORMANCE_SUBPATH
 
 echo "--------- Edit performance website config file ---------"
