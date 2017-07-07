@@ -66,6 +66,11 @@ echo "--------------- Project Management --------------"
 fastInstall git-core git git-gui gitk mercurial
 echo "In git gui, the 'Loose Object' popup will never be displayed."
 git config --global gui.gcwarning false
+echo "Git email and username will be set"
+read -p 'Specify Git email address (quentin@comte-gaz.com): ' GIT_EMAIL
+read -p 'Specify Git name (Quentin Comte-Gaz): ' GIT_NAME
+git config --global user.email $GIT_EMAIL
+git config --global user.name $GIT_NAME
 
 echo "---------------- FTP Management -----------------"
 fastInstall lftp filezilla
