@@ -22,10 +22,14 @@ read -p 'Specify performance website password (example: azerty): ' TEAMSPEAK_WEB
 echo "--------- Update and upgrade the system ---------"
 updateAndUpgrade
 
+echo "--------- Copy ezservermonitor-web config into apache folder ---------"
+cp ../files/esm.config.json "$APACHE_DIR/esm.config.json"
+
 echo "--------- Install $PERFORMANCE_ADDRESS website ---------"
 cd $APACHE_DIR
 git clone https://github.com/QuentinCG/ezservermonitor-web.git
 mv ezservermonitor-web $PERFORMANCE_SUBPATH
+mv esm.config.json $PERFORMANCE_SUBPATH/conf/
 
 echo "--------- Edit performance website config file ---------"
 echo "--------- You'll be asked to edit performance config file (please press a key) ------------"

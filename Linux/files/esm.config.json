@@ -1,0 +1,142 @@
+{
+  "esm":
+  {
+    "version": "2.5",
+    "website": "http://performance.comte-gaz.com",
+    "check_updates": false,
+    "auto_refresh": 3600,
+    "theme": "blue",
+    "custom_title": "My server performance"
+  },
+  "cpu":
+  {
+    "enable_temperature": true
+  },
+  "disk":
+  {
+    "show_tmpfs": false,
+    "show_filesystem": false
+  },
+  "ping":
+  {
+    "hosts": 
+   [
+      "comte-gaz.com",
+      "quentin.comte-gaz.com",
+      "terreetvies.com",
+      "teamspeak.comte-gaz.com",
+      "ts.comte-gaz.com",
+      "mail.comte-gaz.com",
+      "performance.comte-gaz.com",
+      "phpmyadmin.comte-gaz.com",
+      "torrent.comte-gaz.com",
+      "files.comte-gaz.com",
+      "gitlab.comte-gaz.com",
+      "test.comte-gaz.com",
+      "www.comte-gaz.com",
+      "www.quentin.comte-gaz.com",
+      "www.terreetvies.com",
+      "www.teamspeak.comte-gaz.com",
+      "www.ts.comte-gaz.com",
+      "www.mail.comte-gaz.com",
+      "www.performance.comte-gaz.com",
+      "www.phpmyadmin.comte-gaz.com",
+      "www.torrent.comte-gaz.com",
+      "www.files.comte-gaz.com",
+      "www.gitlab.comte-gaz.com",
+      "www.test.comte-gaz.com",
+      "195.154.13.146",
+      "163.172.39.170"
+    ]
+  },
+  "last_login":
+  {
+    "enable": true,
+    "max": 10
+  },
+  "services":
+  {
+    "show_port": true,
+    "list":
+    [
+      {
+        "name": "Web Server (Non Secured)",
+        "host": "localhost",
+        "port": 80,
+        "protocol": "tcp"
+      },
+      {
+        "name": "Web Server (Secured)",
+        "host": "localhost",
+        "port": 443,
+        "protocol": "tcp"
+      },
+      {
+        "name": "FTP (with SSL)",
+        "host": "localhost",
+        "port": 2121,
+        "protocol": "tcp"
+      },
+      {
+        "name": "SSH and SFTP",
+        "host": "localhost",
+        "port": 50555,
+        "protocol": "tcp"
+      },
+      {
+        "name": "MySQL",
+        "host": "localhost",
+        "port": "3306",
+        "protocol": "tcp"
+      },
+      {
+        "name": "Teamspeak 3",
+        "host": "localhost",
+        "port": 10011,
+        "protocol": "tcp"
+      },
+      {
+        "name": "Torrent",
+        "host": "localhost",
+        "port": 9001,
+        "protocol": "tcp"
+      },
+      {
+        "name": "GitLab",
+        "host": "localhost",
+        "port": 1276,
+        "protocol": "tcp"
+      },
+      {
+        "name": "Mail (OVH IMAP)",
+        "host": "ssl0.ovh.net",
+        "port": 993,
+        "protocol": "tcp"
+      },
+      {
+        "name": "Mail (OVH POP)",
+        "host": "ssl0.ovh.net",
+        "port": 995,
+        "protocol": "tcp"
+      },
+      {
+        "name": "Mail (OVH SMTP)",
+        "host": "ssl0.ovh.net",
+        "port": 465,
+        "protocol": "tcp"
+      },
+      {
+        "name": "Closed default SSH",
+        "host": "localhost",
+        "port": 22,
+        "protocol": "tcp"
+      },
+      {
+        "name": "Closed default FTP",
+        "host": "localhost",
+        "port": 21,
+        "protocol": "tcp"
+      }
+    ]
+  }
+}
