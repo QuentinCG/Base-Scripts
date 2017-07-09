@@ -73,7 +73,7 @@ git config --global user.email $GIT_EMAIL
 git config --global user.name $GIT_NAME
 
 echo "---------------- FTP Management -----------------"
-fastInstall lftp filezilla
+fastInstall lftp filezilla ftp
 
 echo "---------------- Torrent clients ----------------"
 fastInstall transmission deluge rtorrent
