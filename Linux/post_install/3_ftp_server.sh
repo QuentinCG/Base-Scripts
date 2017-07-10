@@ -49,6 +49,7 @@ echo "<Anonymous /home/public_ftp>
 </Anonymous>" >> /etc/proftpd/proftpd.conf
 
 echo "Add SSL authentification for FTP (fill it with valid info)"
+echo "SSL certificates can be changed by let's encrypt certificate later (/etc/letsencrypt/live/(...)/)"
 waitUserAction
 sudo openssl req -new -x509 -days 36500 -nodes -out /etc/ssl/certs/proftpd.cert -keyout /etc/ssl/private/proftpd.key
 sudo chmod 640 /etc/ssl/private/proftpd.key
@@ -65,6 +66,7 @@ echo "<IfModule mod_tls.c>
   # Give certificate location
   TLSRSACertificateFile /etc/ssl/certs/proftpd.cert
   TLSRSACertificateKeyFile /etc/ssl/private/proftpd.key
+  #TLSCertificateChainFile
 
   # Client does not need to have certificate
   TLSVerifyClient off
