@@ -78,6 +78,12 @@
         "protocol": "tcp"
       },
       {
+        "name": "Mosquitto (with SSL)",
+        "host": "localhost",
+        "port": 8883,
+        "protocol": "tcp"
+      },
+      {
         "name": "SSH and SFTP",
         "host": "localhost",
         "port": 50555,
@@ -123,6 +129,12 @@
         "name": "Mail (OVH SMTP)",
         "host": "ssl0.ovh.net",
         "port": 465,
+        "protocol": "tcp"
+      },
+      {
+        "name": "Closed default Mosquitto",
+        "host": "localhost",
+        "port": 1883,
         "protocol": "tcp"
       },
       {
