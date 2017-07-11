@@ -15,6 +15,7 @@ __dependency__ = "fbchat (use 'pip install fbchat' to install package)"
 
 import sys, getopt, logging
 import fbchat
+from fbchat.models import *
 
 def sendWithFacebookMessenger(email_address, password, receiver_id, message, image_path, debug=True):
   """Send message and or image via Facebook Messenger
@@ -32,18 +33,18 @@ def sendWithFacebookMessenger(email_address, password, receiver_id, message, ima
   return_value = False
 
   # Initialize the dropbox connection
-  client = fbchat.Client(email_address, password, debug, user_agent=None)
+  client = fbchat.Client(email_address, password)
 
   if message != "" and image_path == "":
     try:
-      client.send(receiver_id, message)
+      client.sendMessage(message, thread_id=receiver_id, thread_type=ThreadType.USER)
       return_value = True
     # TODO: Be more precise in exceptions (but a lot of exceptions can occure with client.send)
     except Exception:
       pass
   elif image_path != "":
     try:
-      client.sendLocalImage(receiver_id, message, image=image_path)
+      client.sendLocalImage(image_path, message=message, thread_id=receiver_id, thread_type=ThreadType.USER)
       return_value = True
     # TODO: Be more precise in exceptions (but a lot of exceptions can occure with client.send)
     except Exception:
