@@ -62,9 +62,6 @@ fastInstall perl python python2.7 python3
 echo "--------------- Install cmd jokes ---------------"
 fastInstall fortune
 
-echo "--------------- Install MQTT server and client ---------------"
-fastInstall mosquitto mosquitto-clients
-
 echo "--------------- Project Management --------------"
 fastInstall git-core git git-gui gitk mercurial
 echo "In git gui, the 'Loose Object' popup will never be displayed."
