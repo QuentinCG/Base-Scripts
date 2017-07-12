@@ -36,4 +36,4 @@ sudo chown mosquitto:mosquitto $MOSQUITTO_PATH/password
 sudo chmod -R 775 /home/$MOSQUITTO_PATH
 
 echo "Restarting Mosquitto"
-sudo service mosquitto reload
+sudo service mosquitto restart

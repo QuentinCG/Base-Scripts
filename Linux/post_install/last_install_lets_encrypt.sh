@@ -32,5 +32,7 @@ sudo /opt/letsencrypt/letsencrypt-auto
 echo "- Install automatic Let's Encrypt renew (weekly) -"
 echo "date +'----------------- Lets Encrypt cron began at %d-%m-%y at %H:%M:%S -----------------' >> /var/log/letsencrypt/letsencrypt-renew.log
 sudo /opt/letsencrypt/certbot-auto renew --no-self-upgrade >> /var/log/letsencrypt/letsencrypt-renew.log 2>&1
+sudo service mosquitto restart >> /var/log/letsencrypt/letsencrypt-renew.log 2>&1
+sudo service proftpd restart >> /var/log/letsencrypt/letsencrypt-renew.log 2>&1
 date +'----------------- Lets Encrypt cron done at %d-%m-%y at %H:%M:%S -----------------' >> /var/log/letsencrypt/letsencrypt-renew.log" | sudo tee /etc/cron.weekly/letsencrypt-renew
 sudo chmod 755 /etc/cron.weekly/letsencrypt-renew
