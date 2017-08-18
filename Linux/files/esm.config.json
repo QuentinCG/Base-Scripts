@@ -69,72 +69,72 @@
         "host": "localhost",
         "port": 80,
         "protocol": "tcp",
-        "start": "sudo /etc/init.d/apache2 start",
-        "stop": "sudo /etc/init.d/apache2 restart"
+        "start": "/etc/init.d/apache2 start",
+        "stop": "/etc/init.d/apache2 restart"
       },
       {
         "name": "Web Server (Secured)",
         "host": "localhost",
         "port": 443,
         "protocol": "tcp",
-        "start": "sudo /etc/init.d/apache2 start",
-        "stop": "sudo /etc/init.d/apache2 restart"
+        "start": "/etc/init.d/apache2 start",
+        "stop": "/etc/init.d/apache2 restart"
       },
       {
         "name": "FTP (with SSL)",
         "host": "localhost",
         "port": 2121,
         "protocol": "tcp",
-        "start": "sudo /etc/init.d/proftpd start",
-        "stop": "sudo /etc/init.d/proftpd stop"
+        "start": "/etc/init.d/proftpd start",
+        "stop": "/etc/init.d/proftpd stop"
       },
       {
         "name": "SSH and SFTP",
         "host": "localhost",
         "port": 50555,
         "protocol": "tcp",
-        "start": "sudo /etc/init.d/ssh start",
-        "stop": "sudo /etc/init.d/ssh stop"
+        "start": "/etc/init.d/ssh start",
+        "stop": "/etc/init.d/ssh stop"
       },
       {
         "name": "MySQL",
         "host": "localhost",
         "port": "3306",
         "protocol": "tcp",
-        "start": "sudo /etc/init.d/mysql start",
-        "stop": "sudo /etc/init.d/mysql stop"
+        "start": "/etc/init.d/mysql start",
+        "stop": "/etc/init.d/mysql stop"
       },
       {
         "name": "Teamspeak 3",
         "host": "localhost",
         "port": 10011,
         "protocol": "tcp",
-        "start": "sudo /home/teamspeak/teamspeak3-server/ts3server_startscript.sh start",
-        "stop": "sudo /home/teamspeak/teamspeak3-server/ts3server_startscript.sh stop"
+        "start": "/home/teamspeak/teamspeak3-server/ts3server_startscript.sh start",
+        "stop": "/home/teamspeak/teamspeak3-server/ts3server_startscript.sh stop"
       },
       {
         "name": "Torrent",
         "host": "localhost",
         "port": 9001,
         "protocol": "tcp",
-        "start": "sudo /etc/init.d/transmission-daemon start",
-        "stop": "sudo /etc/init.d/transmission-daemon stop"
+        "start": "/etc/init.d/transmission-daemon start",
+        "stop": "/etc/init.d/transmission-daemon stop"
       },
       {
         "name": "GitLab",
         "host": "localhost",
         "port": 1276,
         "protocol": "tcp",
-        "start": "sudo gitlab-ctl start",
-        "stop": "sudo gitlab-ctl stop"
+        "start": "/opt/gitlab/bin/gitlab-ctl start",
+        "stop": "/opt/gitlab/bin/gitlab-ctl stop"
       },
       {
         "name": "Mosquitto (with SSL)",
         "host": "localhost",
         "port": 8883,
         "protocol": "tcp",
-        "start": "sudo /etc/init.d/mosquitto start",
-        "stop": "sudo /etc/init.d/mosquitto stop"
+        "start": "/etc/init.d/mosquitto start",
+        "stop": "/etc/init.d/mosquitto stop"
       },
       {
         "name": "Mail (OVH IMAP)",
