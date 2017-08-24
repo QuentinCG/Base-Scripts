@@ -17,8 +17,13 @@
 
 source ../utils/functions.sh
 
+APACHE_DIR="/var/www"
+GITLAB_SUBPATH="gitlab"
+GITLAB_FULL_PATH="$APACHE_DIR/$GITLAB_SUBPATH"
+
 read -p 'Specify GitLab port (example: 1276): ' GITLAB_PORT
 read -p 'Specify GitLab domain address (example: gitlab.comte-gaz.com): ' GITLAB_DOMAIN
+read -p 'Specify GitLab mail address (example: gitlab@comte-gaz.com): ' GITLAB_MAIL
 
 echo "--------- Update and upgrade the system ----------"
 updateAndUpgrade
@@ -31,30 +36,45 @@ curl -sS https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/scrip
 install gitlab-ce
 
 echo "-------- Please edit email informations and external URL values ---------"
-echo "-------- GitLab config file will be oppened when after you pressend Enter ---------"
-echo "-------- Note: external_url must be modified from 'xxxx.com' to 'xxxxx.com:$GITLAB_PORT' ---------"
+echo "-------- GitLab config file will be opened when after you press Enter ---------"
+echo "-------- Note: external_url must be modified into 'http(s)://xxxxx.com:$GITLAB_PORT' ---------"
 waitUserAction
 vim /etc/gitlab/gitlab.rb
 
 echo "-------- Configuring GitLab ---------"
 sudo gitlab-ctl reconfigure
 
-echo "---------Enable mod for apache proxy with Gitlab port----------"
-sudo a2enmod rewrite proxy proxy_http
-sudo service apache2 restart
+#echo "---------Enable mod for apache proxy with Gitlab port----------"
+#sudo a2enmod rewrite proxy proxy_http
+#sudo service apache2 restart
 
 echo "---Adding the server information: $GITLAB_DOMAIN website:---"
+
+cd $APACHE_DIR
+mkdir GITLAB_SUBPATH
+echo '<meta http-equiv="refresh" content="0; url=http://$GITLAB_DOMAIN:$GITLAB_PORT" />' > $GITLAB_FULL_PATH/index.php
+
 cd /etc/apache2/sites-available/
-
 echo "<VirtualHost *:80>
-        ServerName $GITLAB_DOMAIN
-        ServerAlias www.$GITLAB_DOMAIN
+  ServerAdmin  $GITLAB_MAIL
+  ServerName  $GITLAB_DOMAIN
+  ServerAlias www.$GITLAB_DOMAIN
 
-        RewriteEngine On
-        RewriteRule ^/$ /web/ [L,R=301]
+  # Stored website
+  DocumentRoot $GITLAB_FULL_PATH
 
-        ProxyPass / http://127.0.0.1:$GITLAB_PORT/
-        ProxyPassReverse / http://127.0.0.1:$GITLAB_PORT/
+  # Website options (<=>.htaccess)
+  <Directory $GITLAB_FULL_PATHb>
+    # Allow .htaccess to override config
+    AllowOverride All
+    # Allow everybody to see the website
+    Order allow,deny
+    allow from all
+  </Directory>
+
+  # Logs (IPs, sent files, errors, ...)
+  ErrorLog /var/log/apache2/gitlab-error_log
+  TransferLog /var/log/apache2/gitlab-access_log
 </VirtualHost>" > gitlab.conf
 
 echo "Enabling the new website"
@@ -63,3 +83,12 @@ sudo a2ensite gitlab.conf
 echo "Restarting Apache2"
 sudo service apache2 reload
 sudo /etc/init.d/apache2 restart
+
+echo "If you want secured Gitlab (HTTPS), edit /etc/gitlab/gitlab.rb as followed:"
+echo "external_url 'https://$GITLAB_DOMAIN:$GITLAB_PORT'"
+echo "nginx['enable'] = true"
+echo "nginx['redirect_http_to_https'] = true"
+echo "nginx['redirect_http_to_https_port'] = 1277"
+echo "nginx['ssl_certificate'] = '/etc/letsencrypt/live/xxxxxx/cert.pem'"
+echo "nginx['ssl_certificate_key'] = '/etc/letsencrypt/live/xxxxxx/privkey.pem'"
+echo "Also edit $GITLAB_FULL_PATH/index.php to use HTTPS instead of HTTP"
