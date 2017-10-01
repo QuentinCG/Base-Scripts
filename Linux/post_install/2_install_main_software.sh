@@ -14,6 +14,9 @@ source ../utils/functions.sh
 echo "-------------- Install Text editors -------------"
 fastInstall vim gedit
 
+echo "-------------- Install anacron (cron) -------------"
+fastInstall vim gedit
+
 echo "------ Install basic file transfer (curl) -------"
 fastInstall curl
 
@@ -28,6 +31,9 @@ echo "Use '/etc/init.d/fail2ban restart' to restart fail2ban"
 echo "---------- Install security NMAP check ----------"
 fastInstall nmap
 echo "Use 'nmap -sT -O localhost' to check open port"
+
+echo "---------- Install clock synch ----------"
+fastInstall ntp
 
 echo "---------- Install htop (memory check) ----------"
 fastInstall htop
