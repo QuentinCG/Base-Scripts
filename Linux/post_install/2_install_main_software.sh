@@ -60,7 +60,9 @@ fastInstall dos2unix
 #fastInstall irssi
 
 echo "------ Install compiler and minimalist libraries ------"
-fastInstall cmake make gcc build-essential
+fastInstall cmake make gcc g++ build-essential
+echo "build small C program with command 'gcc program.c -o program'"
+echo "build small C++ program with command 'g++ -std=c++11 program.cpp -o program'"
 
 echo "- Install package to compile projects with Qt4 or Qt5 -"
 fastInstall qtchooser qtcreator
