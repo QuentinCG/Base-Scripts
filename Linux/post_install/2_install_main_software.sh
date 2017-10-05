@@ -61,13 +61,14 @@ fastInstall dos2unix
 
 echo "------ Install compiler and minimalist libraries ------"
 fastInstall cmake make gcc g++ build-essential
-echo "build small C program with command 'gcc program.c -o program'"
-echo "build small C++ program with command 'g++ -std=c++11 program.cpp -o program'"
+echo "Build small C program with command 'gcc program.c -o program'"
+echo "Build small C++ program with command 'g++ -std=c++11 program.cpp -o program'"
 
 echo "- Install package to compile projects with Qt4 or Qt5 -"
 fastInstall qtchooser qtcreator
 fastInstall qt4-qmake qt4-dev-tools qt4-default
 fastInstall qt5-qmake qtbase5-dev-tools qt5-default
+echo "Build Qt application with command 'qmake -qt=qt5 PATH_TO_PRO_FILE.pro -spec linux-g++-64 CONFIG=debug && make'"
 
 echo "------------ Install Perl, Ruby and Python ------------"
 fastInstall perl python python2.7 python3 ruby-full
