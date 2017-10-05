@@ -59,8 +59,13 @@ fastInstall dos2unix
 #echo "--------------- Install IRC client --------------"
 #fastInstall irssi
 
-echo "--------------- Install compilers ---------------"
-fastInstall cmake make gcc
+echo "------ Install compiler and minimalist libraries ------"
+fastInstall cmake make gcc build-essential
+
+echo "- Install package to compile projects with Qt4 or Qt5 -"
+fastInstall qtchooser qtcreator
+fastInstall qt4-qmake qt4-dev-tools qt4-default
+fastInstall qt5-qmake qtbase5-dev-tools qt5-default
 
 echo "------------ Install Perl, Ruby and Python ------------"
 fastInstall perl python python2.7 python3 ruby-full
