@@ -111,6 +111,20 @@ else
   echo "Impossible to configure X11 server (no SSH installed)"
 fi
 
+echo "------------ Install Docker -----------"
+echo "Do you want to install Docker?"
+select yn in "Yes" "No"; do
+  case $yn in
+    Yes ) replaceLineOrAddEndFile /etc/apt/sources.list "dockerproject" "\n# Docker\ndeb https://apt.dockerproject.org/repo debian-stretch main";
+          apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys F76221572C52609D
+          updateAndUpgrade;
+          fastInstall docker-engine;
+          break;;
+    No ) echo "No need to install Docker packages";
+         break;;
+  esac
+done
+
 echo "------------ Install VirtualBox guest -----------"
 echo "Do you use Linux as a VirtualBox guest?"
 select yn in "Yes" "No"; do
