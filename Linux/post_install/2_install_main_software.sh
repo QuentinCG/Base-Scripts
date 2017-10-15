@@ -68,7 +68,7 @@ fastInstall qt4-qmake qt4-dev-tools qt4-default
 fastInstall qt5-qmake qtbase5-dev-tools qt5-default
 
 echo "------------ Install Perl, Ruby and Python ------------"
-fastInstall perl python python2.7 python3 ruby-full
+fastInstall perl python python2.7 python3 ruby-full python-pip python3-pip
 
 echo "--------------- Install cmd jokes ---------------"
 fastInstall fortune
