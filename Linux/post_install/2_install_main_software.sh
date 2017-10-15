@@ -60,12 +60,15 @@ fastInstall dos2unix
 #fastInstall irssi
 
 echo "------ Install compiler and minimalist libraries ------"
-fastInstall cmake make gcc build-essential
+fastInstall cmake make gcc g++ build-essential
+echo "Build small C program with command 'gcc program.c -o program'"
+echo "Build small C++ program with command 'g++ -std=c++11 program.cpp -o program'"
 
 echo "- Install package to compile projects with Qt4 or Qt5 -"
 fastInstall qtchooser qtcreator
 fastInstall qt4-qmake qt4-dev-tools qt4-default
 fastInstall qt5-qmake qtbase5-dev-tools qt5-default
+echo "Build Qt application with command 'qmake -qt=qt5 PATH_TO_PRO_FILE.pro -spec linux-g++-64 CONFIG=debug && make'"
 
 echo "------------ Install Perl, Ruby and Python ------------"
 fastInstall perl python python2.7 python3 ruby-full python-pip python3-pip
@@ -107,6 +110,20 @@ if [ -e "$X11CONFIG" ]; then
 else
   echo "Impossible to configure X11 server (no SSH installed)"
 fi
+
+echo "------------ Install Docker -----------"
+echo "Do you want to install Docker?"
+select yn in "Yes" "No"; do
+  case $yn in
+    Yes ) replaceLineOrAddEndFile /etc/apt/sources.list "dockerproject" "\n# Docker\ndeb https://apt.dockerproject.org/repo debian-stretch main";
+          apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys F76221572C52609D
+          updateAndUpgrade;
+          fastInstall docker-engine;
+          break;;
+    No ) echo "No need to install Docker packages";
+         break;;
+  esac
+done
 
 echo "------------ Install VirtualBox guest -----------"
 echo "Do you use Linux as a VirtualBox guest?"
