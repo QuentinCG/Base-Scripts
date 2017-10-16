@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-  Cheat demo for pokemon-origins.com website
-  How to use: {filename}.py --login MyLoginHere --password MyPasswordHere
+  Do actions on pokemon-origins.com website
 """
 __author__ = 'Quentin Comte-Gaz'
 __email__ = "quentin@comte-gaz.com"
@@ -21,169 +20,171 @@ import time
 import requests
 from bs4 import BeautifulSoup
 
-WAIT_AFTER_REQUEST = 1 # Sec
-BASE_WEBSITE = "http://www.pokemon-origins.com"
-
-def connect(login, password, session):
-  """Connect to the website with specific identification
-
-  Keyword arguments:
-    login -- (str) Login
-    password -- (str) Password
-    session -- (requests.Session) Session
-
-  return: (bool) Is connected?
+class PokemonOrigins:
+  """Class to do actions on pokemon-origins.com
   """
-  login_url = "{}/connexion.php".format(BASE_WEBSITE)
-  payload = {
-             "pseudo": login,
-             "mdp": password,
-             "action": "identification",
-             "identification": "identification"
-            }
+  __WAIT_AFTER_REQUEST = 1 # Sec
+  __BASE_WEBSITE = "http://www.pokemon-origins.com"
 
-  post_login = session.post(url=login_url,
-                            data=payload)
+  def __init__(self):
+    self.session = requests.Session()
 
-  time.sleep(WAIT_AFTER_REQUEST)
+  def connect(self, login, password):
+    """Connect to the website with specific identification
 
-  return ("Vous êtes maintenant connecté." in post_login.text)
+    Keyword arguments:
+      login -- (str) Login
+      password -- (str) Password
 
-def disconnect(session):
-  """Disconnect from the website
+    return: (bool) Is connected?
+    """
+    login_url = "{}/connexion.php".format(PokemonOrigins.__BASE_WEBSITE)
+    payload = {
+               "pseudo": login,
+               "mdp": password,
+               "action": "identification",
+               "identification": "identification"
+              }
 
-  Keyword arguments:
-    session -- (request.Session) Session
+    post_login = self.session.post(url=login_url, data=payload)
 
-  return: (bool) Is disconnected?
-  """
-  disconnection_url = "{}/deconnexion.php".format(BASE_WEBSITE)
-  disconnection_status = session.get(url=disconnection_url)
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
-  time.sleep(WAIT_AFTER_REQUEST)
-
-  return ("Votre session a bien été arretée!" in disconnection_status.text)
-
-def doAllBonus(session):
-  """Do all 3 bonus to get in-game gold
-
-  Keyword arguments:
-    session -- (request.Session) Session
-  """
-  bonus_uris = {
-                 "bonus1.php",
-                 "bonus2.php",
-                 "bonus3.php"
-               }
-
-  for bonus_uri in bonus_uris:
-    # Get base bonus page and check if it is possible to get the bonus
-    if bonus_uri in session.get("{}/bonus.php".format(BASE_WEBSITE)).text:
-      time.sleep(WAIT_AFTER_REQUEST)
-      # Then get the bonus
-      session.get("{}/{}".format(BASE_WEBSITE, bonus_uri))
-      time.sleep(WAIT_AFTER_REQUEST)
-      logging.debug("Bonus {} done.".format(bonus_uri))
+    result = ("Vous êtes maintenant connecté." in post_login.text)
+    if result:
+      logging.debug("Connected to {}".format(login))
     else:
-      logging.warning("No bonus possible for {} (already done)".format(bonus_uri))
-      time.sleep(WAIT_AFTER_REQUEST)
+      logging.warning("Could not connect to {}".format(login))
 
-def getAvailableMissionsAndPokemons(available_missions, available_pokemons, session):
-  """Get a list of all available missions and pokemons available to do missions
+    return result
 
-  Keyword arguments:
-    available_missions -- (out, list) List of available missions
-    available_pokemons -- (out, list) List of available pokemons
-    session -- (request.Session) Session
-  """
-  mission_url = "{}/missions.php".format(BASE_WEBSITE)
+  def disconnect(self):
+    """Disconnect from the website
 
-  missions_data = BeautifulSoup(session.get(url=mission_url).text, "html.parser")
-  time.sleep(WAIT_AFTER_REQUEST)
+    return: (bool) Is disconnected?
+    """
+    disconnection_url = "{}/deconnexion.php".format(PokemonOrigins.__BASE_WEBSITE)
+    disconnection_status = self.session.get(url=disconnection_url)
 
-  # Get the list of all missions and usable pokemons
-  all_forms = missions_data.findAll("form")
-  for form in all_forms:
-    inputs = form.findAll("input")
-    # Add the mission id to the list of possible missions
-    try:
-      id_mission = str(form.find('input', {'name': 'id_mission'}).get("value"))
-      available_missions.append(id_mission)
-    except AttributeError:
-      pass
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
-    # Add all available pokemons (if not already done)
-    if len(available_pokemons) <= 0:
+    result = ("Votre session a bien été arretée!" in disconnection_status.text)
+    if result:
+      logging.debug("Disconnected from {}")
+    else:
+      logging.warning("Could not disconnect")
+
+    return result
+
+  def doAllBonus(self):
+    """Do all 3 bonus to get in-game gold
+    """
+    bonus_uris = {
+                   "bonus1.php",
+                   "bonus2.php",
+                   "bonus3.php"
+                 }
+
+    for bonus_uri in bonus_uris:
+      # Get base bonus page and check if it is possible to get the bonus
+      if bonus_uri in self.session.get("{}/bonus.php".format(PokemonOrigins.__BASE_WEBSITE)).text:
+        time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+        # Then get the bonus
+        self.session.get("{}/{}".format(PokemonOrigins.__BASE_WEBSITE, bonus_uri))
+        time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+        logging.debug("Bonus {} done.".format(bonus_uri))
+      else:
+        logging.warning("No bonus possible for {} (already done)".format(bonus_uri))
+        time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+  def getAvailableMissionsAndPokemons(self, available_missions, available_pokemons):
+    """Get a list of all available missions and pokemons available to do missions
+
+    Keyword arguments:
+      available_missions -- (out, list) List of available missions
+      available_pokemons -- (out, list) List of available pokemons
+    """
+    mission_url = "{}/missions.php".format(PokemonOrigins.__BASE_WEBSITE)
+
+    missions_data = BeautifulSoup(self.session.get(url=mission_url).text, "html.parser")
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+    # Get the list of all missions and usable pokemons
+    all_forms = missions_data.findAll("form")
+    for form in all_forms:
+      inputs = form.findAll("input")
+      # Add the mission id to the list of possible missions
       try:
-        for id_pokemon in form.findAll("option"):
-          available_pokemons.append(id_pokemon['value'])
+        id_mission = str(form.find('input', {'name': 'id_mission'}).get("value"))
+        available_missions.append(id_mission)
       except AttributeError:
         pass
 
-  logging.debug("Available missions: {}".format(available_missions))
-  logging.debug("Available pokemons: {}".format(available_pokemons))
+      # Add all available pokemons (if not already done)
+      if len(available_pokemons) <= 0:
+        try:
+          for id_pokemon in form.findAll("option"):
+            available_pokemons.append(id_pokemon['value'])
+        except AttributeError:
+          pass
 
-def doMission(mission, pokemon, session):
-  """Do a mission with a pokemon
+    logging.debug("Available missions: {}".format(available_missions))
+    logging.debug("Available pokemons: {}".format(available_pokemons))
 
-  Keyword arguments:
-    mission -- (str) Mission to do
-    pokemon -- (str) Pokemon to use for the mission
-    session -- (request.Session) Session
-  """
-  logging.debug("Doing mission {} with pokemon {}".format(mission, pokemon))
-  payload = {
-              "id_liste_pokemons": pokemon,
-              "id_mission": mission,
-              "action" : "inscription"
-            }
-  post_mission = session.post(url="{}/missions.php".format(BASE_WEBSITE), data=payload)
-  time.sleep(WAIT_AFTER_REQUEST)
+  def doMission(self, mission, pokemon):
+    """Do a mission with a pokemon
 
-  return ("Votre pokémon est revenu de mission" in post_mission.text)
+    Keyword arguments:
+      mission -- (str) Mission to do
+      pokemon -- (str) Pokemon to use for the mission
+    """
+    payload = {
+                "id_liste_pokemons": pokemon,
+                "id_mission": mission,
+                "action" : "inscription"
+              }
+    try:
+      post_mission = self.session.post(url="{}/missions.php".format(PokemonOrigins.__BASE_WEBSITE), data=payload)
 
-def doAllMissions(session):
-  """Do all missions with all pokemons
+    except requests.exceptions.ContentDecodingError:
+      # This error may occur but should not break all the process
+      logging.error("Error while trying to parse data from mission {} with pokemon {}".format(missions[0], pokemons[0]))
+      time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+      return False
 
-  Keyword arguments:
-    session -- (request.Session) Session
-  """
-  missions = []
-  pokemons = []
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
-  getAvailableMissionsAndPokemons(available_missions=missions,
-                                  available_pokemons=pokemons,
-                                  session=session)
+    result = ("Votre pokémon est revenu de mission" in post_mission.text)
+    if result:
+      logging.debug("Mission {} with pokemon {} done".format(mission, pokemon))
+    else:
+      logging.warning("Could not perform mission {} with pokemon {}".format(mission, pokemon))
 
-  while len(pokemons) > 0:
-    while len(missions) > 0 and len(pokemons) > 0:
-      try:
-        if not doMission(mission=missions[0],
-                         pokemon=pokemons[0],
-                         session=session):
-          logging.warning("Could not do mission {} with pokemon {}".format(missions[0], pokemons[0]))
-      except requests.exceptions.ContentDecodingError:
-        # This error may occur but should not break all the process
-        logging.error("Error while trying to parse data from mission {} with pokemon {}".format(missions[0], pokemons[0]))
+    return result
 
-      pokemons.remove(pokemons[0])
-      missions.remove(missions[0])
+  def doAllMissions(self):
+    """Do all missions with all pokemons
+    """
+    missions = []
+    pokemons = []
 
-    getAvailableMissionsAndPokemons(
-      available_missions=missions,
-      available_pokemons=pokemons,
-      session=session)
+    self.getAvailableMissionsAndPokemons(available_missions=missions, available_pokemons=pokemons)
 
-    # It may occur that there is no missions left for available pokemons
-    # Just wait before some missions becomes available
-    if len(missions) <= 0 and len(pokemons) > 0:
-      time.sleep(60)
+    while len(pokemons) > 0:
+      while len(missions) > 0 and len(pokemons) > 0:
+        self.doMission(mission=missions[0], pokemon=pokemons[0])
+        pokemons.remove(pokemons[0])
+        missions.remove(missions[0])
+
+      self.getAvailableMissionsAndPokemons(available_missions=missions, available_pokemons=pokemons)
+
+      # It may occur that there is no missions left for available pokemons
+      # Just wait before some missions becomes available
+      if len(missions) <= 0 and len(pokemons) > 0:
+        time.sleep(60)
 
 if __name__ == "__main__":
-  """Demo on how to periodically connect and do actions to the website
-
-    Usecase: {filename}.py --login MyLoginHere --password MyPasswordHere
-  """
+  """Demo on how to periodically connect and do actions to the website"""
 
   # Add Logs
   logger = logging.getLogger()
@@ -208,26 +209,18 @@ if __name__ == "__main__":
     print("[ERROR] Login (-l) and password (-p) must be provided.")
     sys.exit(1)
 
-  # Create a session
-  my_session = requests.Session()
+  # Instantiate the class
+  pkm_orig = PokemonOrigins()
 
   # Connect
-  if (connect(login=arg_login, password=arg_password, session=my_session)):
-    logging.debug("Connected with {}".format(arg_login))
-
-    doAllBonus(session=my_session)
-    logging.debug("All bonus done")
-
-    doAllMissions(session=my_session)
-    logging.debug("All missions done")
-
-    if disconnect(session=my_session):
-      logging.debug("Disconnected from {}".format(arg_login))
-    else:
-      logging.warning("Could not disconnect from {}".format(arg_login))
+  if (pkm_orig.connect(login=arg_login, password=arg_password)):
+    # Do some actions in the website
+    pkm_orig.doAllBonus()
+    pkm_orig.doAllMissions()
+    pkm_orig.disconnect()
 
     # Quit the program without error
     sys.exit(0)
 
-  logging.warning("Could not connect with {}".format(arg_login))
+  # Could not connect...
   sys.exit(2)
