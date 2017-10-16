@@ -137,6 +137,8 @@ class PokemonOrigins:
     Keyword arguments:
       mission -- (str) Mission to do
       pokemon -- (str) Pokemon to use for the mission
+
+    return: (bool) Done?
     """
     payload = {
                 "id_liste_pokemons": pokemon,
@@ -182,6 +184,35 @@ class PokemonOrigins:
       # Just wait before some missions becomes available
       if len(missions) <= 0 and len(pokemons) > 0:
         time.sleep(60)
+
+  def goToInMap(self, x, y):
+    """Move to specific coordonates in the map
+
+    Keyword arguments:
+      x -- (int) Horizontal coordonates
+      y -- (int) Vertical coordonates
+
+    return: (bool) Done?
+    """
+    move_url = "{}/carte2.php?horizontal={}&vertical={}".format(PokemonOrigins.__BASE_WEBSITE, str(int(x)), str(int(y)))
+
+    self.session.get(url=move_url)
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+    # Since info in previous request are now up to date, check result with an other request
+    check_move_url = "{}/carte.php".format(PokemonOrigins.__BASE_WEBSITE)
+    move_status = self.session.get(url=check_move_url)
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+    result = ("Vous êtes actuellement en ({},{})".format(str(int(y)), str(int(x))) in move_status.text)
+    print(move_status.text)
+
+    if result:
+      logging.debug("Move to ({},{})".format(str(int(x)), str(int(y))))
+    else:
+      logging.warning("Could not move to ({},{}) done".format(str(int(x)), str(int(y))))
+
+    return result
 
 if __name__ == "__main__":
   """Demo on how to periodically connect and do actions to the website"""
