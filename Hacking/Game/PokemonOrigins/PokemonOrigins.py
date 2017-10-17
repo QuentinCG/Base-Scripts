@@ -70,7 +70,7 @@ class PokemonOrigins:
 
     result = ("Votre session a bien été arretée!" in disconnection_status.text)
     if result:
-      logging.debug("Disconnected from {}")
+      logging.debug("Disconnected")
     else:
       logging.warning("Could not disconnect")
 
@@ -194,9 +194,13 @@ class PokemonOrigins:
 
     return: (bool) Done?
     """
-    move_url = "{}/carte2.php?horizontal={}&vertical={}".format(PokemonOrigins.__BASE_WEBSITE, str(int(x)), str(int(y)))
+    move_url = "{}/carte2.php".format(PokemonOrigins.__BASE_WEBSITE)
+    payload = {
+               "horizontal": int(x),
+               "vertical": int(y)
+              }
 
-    self.session.get(url=move_url)
+    self.session.get(url=move_url, params=payload)
     time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
     # Since info in previous request are now up to date, check result with an other request
@@ -205,14 +209,23 @@ class PokemonOrigins:
     time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
     result = ("Vous êtes actuellement en ({},{})".format(str(int(y)), str(int(x))) in move_status.text)
-    print(move_status.text)
 
     if result:
-      logging.debug("Move to ({},{})".format(str(int(x)), str(int(y))))
+      logging.debug("Moved to ({},{})".format(str(int(x)), str(int(y))))
     else:
-      logging.warning("Could not move to ({},{}) done".format(str(int(x)), str(int(y))))
+      logging.warning("Could not move to ({},{})".format(str(int(x)), str(int(y))))
 
     return result
+
+  def stopTips(self):
+    """Stop showing tips in the map page
+    """
+    stop_tips_url = "{}/carte.php".format(PokemonOrigins.__BASE_WEBSITE)
+    payload = {
+               "action": "end_astuces"
+              }
+
+    self.session.get(url=stop_tips_url, params=payload)
 
 if __name__ == "__main__":
   """Demo on how to periodically connect and do actions to the website"""
