@@ -19,6 +19,8 @@ import sys
 import time
 import requests
 from bs4 import BeautifulSoup
+import re #RegExp
+import random
 
 class PokemonOrigins:
   """Class to do actions on pokemon-origins.com
@@ -47,7 +49,6 @@ class PokemonOrigins:
               }
 
     post_login = self.session.post(url=login_url, data=payload)
-
     time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
     result = ("Vous êtes maintenant connecté." in post_login.text)
@@ -231,6 +232,7 @@ class PokemonOrigins:
               }
 
     self.session.get(url=stop_tips_url, params=payload)
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
   def getOwnedGoldAndDollars(self):
     """Get the dollars and gold amount of the account
@@ -272,16 +274,20 @@ class PokemonOrigins:
       result -- (bool) The retrieved data are correct
       active_pokemon -- (int) Current pokemon
       inactive_pokemons -- (list) List of all owned pokemons (not active)
+      is_level_100 -- (bool) Check if the level of the current pokemon is 100
+      can_level_up -- (bool) Check if the current pokemon can level up
     """
     active_pokemon = -1
     inactive_pokemons = []
+    is_level_100 = False
+    can_level_up = False
 
-    all_data = BeautifulSoup(self.session.get(url=PokemonOrigins.__BASE_WEBSITE).text,
-                             "html.parser")
+    response = self.session.get(url=PokemonOrigins.__BASE_WEBSITE)
     time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
-    # Parse dollars and gold values from the html data
-    all_links = all_data.findAll("a")
+    # Parse active and inactive pokemons from the html data
+    all_pokemons = BeautifulSoup(response.text, "html.parser")
+    all_links = all_pokemons.findAll("a")
     for link in all_links:
       if "vos_pokemons.php?id=" in link['href']:
         active_pokemon = int(link['href'].replace("vos_pokemons.php?id=", ""))
@@ -289,9 +295,130 @@ class PokemonOrigins:
       elif "carte.php?pokemon_actif=" in link['href']:
         inactive_pokemon = int(link['href'].replace("carte.php?pokemon_actif=", ""))
         inactive_pokemons.append(inactive_pokemon)
-        logging.debug("Found inactive pokemon: {}".format(str(inactive_pokemon)))
+        #logging.debug("Found inactive pokemon: {}".format(str(inactive_pokemon)))
 
-    return (active_pokemon != -1), active_pokemon, inactive_pokemons
+    # Get info to know if current pokemon is level 100
+    if "px;\"> lvl 100" in response.text:
+      is_level_100 = True
+      logging.debug("Current pokemon is level 100")
+    else:
+      logging.debug("Current pokemon is not level 100")
+
+    # Get info to know if current pokemon can level up
+    result = re.search('XP :</b> (.*)<br', response.text)
+    result = re.sub("[^0-9/]", "", str(result.group(1)))
+    current_xp, xp_to_lvl_up = result.split("/")
+    if (int(current_xp) > int(xp_to_lvl_up)):
+      can_level_up = True
+      logging.debug("Current pokemon can level up")
+    else:
+      logging.debug("Current pokemon can't level up")
+
+    return (active_pokemon != -1), active_pokemon, inactive_pokemons, is_level_100, can_level_up
+
+  def selectMainPokemon(self, pokemon_id):
+    """Select main pokemon and get some important data on it
+
+    Keyword arguments:
+      pokemon_id -- (int) Inactive pokemon id to set as active
+
+    return:
+      result -- (bool) The retrieved data are correct
+    """
+    select_url = "{}/carte.php".format(PokemonOrigins.__BASE_WEBSITE)
+    payload = {
+               "pokemon_actif": pokemon_id
+              }
+
+    response = self.session.get(url=select_url, params=payload)
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+    # Confirm change
+    res, active, not_actives, is_level_100, can_level_up = self.getOwnedPokemons()
+
+    if (active == pokemon_id):
+      logging.debug("Active pokemon is now {}".format(str(pokemon_id)))
+      return True
+
+    logging.warning("Could not set pokemon {} as active".format(str(pokemon_id)))
+    return False
+
+  def levelUpPokemon(self, pokemon_id):
+    """Level up a pokemon (if < 100) else upgrade caracteristics
+
+    Keyword arguments:
+      pokemon_id -- (int) Pokemon id to level up
+
+    return:
+      result -- (bool) Pokemon level up
+    """
+    if self.selectMainPokemon(pokemon_id=pokemon_id):
+      res, active_pokemon, inactive_pokemons, is_level_100, can_level_up = self.getOwnedPokemons()
+      if res:
+        if can_level_up:
+          if is_level_100:
+            lvl_up_url = "{}/update_lvl_100.php".format(PokemonOrigins.__BASE_WEBSITE)
+
+            possible_caract = ["pv", "att", "def", "vit", "attspe", "defspe"]
+            payload = {
+               "action": "augmenter",
+               "caracteristique": possible_caract[random.randint(0, 5)]
+            }
+            params = {
+               "id": pokemon_id
+            }
+            post_lvl_up = self.session.post(url=lvl_up_url, data=payload, params=params)
+            time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+            if ("Les caractéristiques ont bien été mises à jour" in post_lvl_up.text):
+              # Level up again and again until it is fully upgraded
+              while self.levelUpPokemon(pokemon_id):
+                logging.debug("Trying again to upgrade Pokemon {}".format(str(pokemon_id)))
+              logging.debug("Pokemon {} caracteristics upgraded".format(str(pokemon_id)))
+              return True
+            else:
+              logging.warning("Pokemon {} caracteristics not upgraded".format(str(pokemon_id)))
+              return False
+          else:
+            lvl_up_url = "{}/update_lvl.php".format(PokemonOrigins.__BASE_WEBSITE)
+            payload = {
+               "id": pokemon_id,
+              }
+            post_lvl_up = self.session.post(url=lvl_up_url, data=payload)
+            time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+            if ("Le pokémon gagn" in post_lvl_up.text):
+              logging.debug("Pokemon {} leveled up".format(str(pokemon_id)))
+              return True
+            else:
+              logging.warning("Pokemon {} did not level up".format(str(pokemon_id)))
+              return False
+        else:
+          # Can't level up, pass
+          logging.debug("Pokemon {} does not need to level up".format(str(pokemon_id)))
+          return False
+      else:
+        return False
+    else:
+      return False
+
+    return False
+
+  def levelUpAllPokemons(self):
+    """Level up all pokemons (if < 100) else upgrade caracteristics
+
+    return:
+      result -- (bool) All pokemon tried to level up
+    """
+    res, active_pokemon, inactive_pokemons, is_level_100, can_level_up = self.getOwnedPokemons()
+    if res:
+      logging.debug("Trying to level up pokemon {}".format(str(active_pokemon)))
+      self.levelUpPokemon(active_pokemon)
+      for pokemon in inactive_pokemons:
+        logging.debug("Trying to level up pokemon {}".format(str(inactive_pokemons)))
+        self.levelUpPokemon(pokemon)
+
+    return res
 
 if __name__ == "__main__":
   """Demo on how to periodically connect and do actions to the website"""
@@ -329,6 +456,7 @@ if __name__ == "__main__":
     pkm_orig.doAllMissions()
     pkm_orig.getOwnedGoldAndDollars()
     pkm_orig.getOwnedPokemons()
+    pkm_orig.levelUpAllPokemons()
     pkm_orig.disconnect()
 
     # Quit the program without error
