@@ -20,8 +20,8 @@ import PokemonOrigins
 class TestPokemonOrigins(unittest.TestCase):
   @classmethod
   def setUpClass(self):
-    self.login = "TO MODIFY"
-    self.password = "TO MODIFY"
+    self.login = "testPy"
+    self.password = "testPy"
 
   def setUp(self):
     self.conn = PokemonOrigins.PokemonOrigins()
@@ -38,7 +38,7 @@ class TestPokemonOrigins(unittest.TestCase):
 
   # Not done since it could be seen as hacking
   #conn_fail = PokemonOrigins.PokemonOrigins()
-  #self.assertFalse(conn_fail.connect(login="admin", password="admin"))
+  #self.assertFalse(conn_fail.connect(login=self.login, password="{}notPass".format(self.password)))
   #self.assertTrue(conn_fail.disconnect())
 
   @unittest.skip("Comment this line to test")
@@ -47,10 +47,7 @@ class TestPokemonOrigins(unittest.TestCase):
 
   @unittest.skip("Comment this line to test")
   def testMissions(self):
-    available_missions = []
-    available_pokemons = []
-    self.conn.getAvailableMissionsAndPokemons(available_missions=available_missions,
-                                              available_pokemons=available_pokemons)
+    available_missions, available_pokemons = self.conn.getAvailableMissionsAndPokemons()
     if len(available_pokemons) > 0:
       self.assertTrue(len(available_missions) > 0)
 
@@ -74,6 +71,19 @@ class TestPokemonOrigins(unittest.TestCase):
   @unittest.skip("Comment this line to test")
   def testStopTips(self):
     self.conn.stopTips()
+
+  @unittest.skip("Comment this line to test")
+  def testGoldAndDollars(self):
+    res, gold, dollars = self.conn.getOwnedGoldAndDollars()
+    self.assertTrue(res)
+    self.assertNotEqual(gold, -1)
+    self.assertNotEqual(dollars, -1)
+
+  @unittest.skip("Comment this line to test")
+  def testOwnedPokemons(self):
+    res, active_pokemon, inactive_pokemons = self.conn.getOwnedPokemons()
+    self.assertTrue(res)
+    self.assertNotEqual(active_pokemon, -1)
 
 if __name__ == '__main__':
   # Add Logs

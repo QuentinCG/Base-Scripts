@@ -97,13 +97,16 @@ class PokemonOrigins:
         logging.warning("No bonus possible for {} (already done)".format(bonus_uri))
         time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
-  def getAvailableMissionsAndPokemons(self, available_missions, available_pokemons):
+  def getAvailableMissionsAndPokemons(self):
     """Get a list of all available missions and pokemons available to do missions
 
-    Keyword arguments:
-      available_missions -- (out, list) List of available missions
-      available_pokemons -- (out, list) List of available pokemons
+    return:
+      available_missions -- (list) List of available missions
+      available_pokemons -- (list) List of available pokemons
     """
+    available_missions = []
+    available_pokemons = []
+
     mission_url = "{}/missions.php".format(PokemonOrigins.__BASE_WEBSITE)
 
     missions_data = BeautifulSoup(self.session.get(url=mission_url).text, "html.parser")
@@ -130,6 +133,8 @@ class PokemonOrigins:
 
     logging.debug("Available missions: {}".format(available_missions))
     logging.debug("Available pokemons: {}".format(available_pokemons))
+
+    return available_missions, available_pokemons
 
   def doMission(self, mission, pokemon):
     """Do a mission with a pokemon
@@ -170,7 +175,7 @@ class PokemonOrigins:
     missions = []
     pokemons = []
 
-    self.getAvailableMissionsAndPokemons(available_missions=missions, available_pokemons=pokemons)
+    missions, pokemons = self.getAvailableMissionsAndPokemons()
 
     while len(pokemons) > 0:
       while len(missions) > 0 and len(pokemons) > 0:
@@ -178,7 +183,7 @@ class PokemonOrigins:
         pokemons.remove(pokemons[0])
         missions.remove(missions[0])
 
-      self.getAvailableMissionsAndPokemons(available_missions=missions, available_pokemons=pokemons)
+      missions, pokemons = self.getAvailableMissionsAndPokemons()
 
       # It may occur that there is no missions left for available pokemons
       # Just wait before some missions becomes available
@@ -227,6 +232,67 @@ class PokemonOrigins:
 
     self.session.get(url=stop_tips_url, params=payload)
 
+  def getOwnedGoldAndDollars(self):
+    """Get the dollars and gold amount of the account
+
+    return:
+      result -- (bool) The retrieved data are correct
+      gold -- (int) Gold (-1 if error)
+      dollars -- (int) Dollars (-1 if error)
+    """
+    gold = -1
+    dollars = -1
+
+    all_data = BeautifulSoup(self.session.get(url=PokemonOrigins.__BASE_WEBSITE).text,
+                             "html.parser")
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+    # Parse dollars and gold values from the html data
+    all_bold = all_data.findAll("b")
+    next_is_gold = False
+    for bold in all_bold:
+      if "$" in bold.text:
+        data_dollars = bold.text.replace(" ", "")
+        data_dollars = data_dollars.replace("$", "")
+        dollars=int(data_dollars)
+        logging.debug("Found {} dollars in this account".format(str(dollars)))
+        next_is_gold = True
+      elif next_is_gold:
+        data_gold = bold.text.replace(" ", "")
+        gold = int(data_gold)
+        logging.debug("Found {} gold in this account".format(str(gold)))
+        return True, gold, dollars
+
+    return False, gold, dollars
+
+  def getOwnedPokemons(self):
+    """Get the pokemons of the account
+
+    return:
+      result -- (bool) The retrieved data are correct
+      active_pokemon -- (int) Current pokemon
+      inactive_pokemons -- (list) List of all owned pokemons (not active)
+    """
+    active_pokemon = -1
+    inactive_pokemons = []
+
+    all_data = BeautifulSoup(self.session.get(url=PokemonOrigins.__BASE_WEBSITE).text,
+                             "html.parser")
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+    # Parse dollars and gold values from the html data
+    all_links = all_data.findAll("a")
+    for link in all_links:
+      if "vos_pokemons.php?id=" in link['href']:
+        active_pokemon = int(link['href'].replace("vos_pokemons.php?id=", ""))
+        logging.debug("Found active pokemon: {}".format(str(active_pokemon)))
+      elif "carte.php?pokemon_actif=" in link['href']:
+        inactive_pokemon = int(link['href'].replace("carte.php?pokemon_actif=", ""))
+        inactive_pokemons.append(inactive_pokemon)
+        logging.debug("Found inactive pokemon: {}".format(str(inactive_pokemon)))
+
+    return (active_pokemon != -1), active_pokemon, inactive_pokemons
+
 if __name__ == "__main__":
   """Demo on how to periodically connect and do actions to the website"""
 
@@ -261,6 +327,8 @@ if __name__ == "__main__":
     # Do some actions in the website
     pkm_orig.doAllBonus()
     pkm_orig.doAllMissions()
+    pkm_orig.getOwnedGoldAndDollars()
+    pkm_orig.getOwnedPokemons()
     pkm_orig.disconnect()
 
     # Quit the program without error
