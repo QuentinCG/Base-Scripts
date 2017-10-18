@@ -47,17 +47,6 @@ class TestPokemonOrigins(unittest.TestCase):
 
   @unittest.skip("Comment this line to test")
   def testMissions(self):
-    available_missions, available_pokemons = self.conn.getAvailableMissionsAndPokemons()
-    if len(available_pokemons) > 0:
-      self.assertTrue(len(available_missions) > 0)
-
-    # Not done since it could be seen as hacking
-    #self.assertFalse(self.conn.doMission(0, 0))
-
-    if len(available_pokemons) > 0 and len(available_missions) > 0:
-      self.assertTrue(self.conn.doMission(mission=available_missions[0],
-                                          pokemon=available_pokemons[0]))
-
     self.conn.doAllMissions()
 
   @unittest.skip("Comment this line to test")
@@ -95,6 +84,10 @@ class TestPokemonOrigins(unittest.TestCase):
   @unittest.skip("Comment this line to test")
   def testLevelUp(self):
     self.conn.levelUpAllPokemons()
+
+  @unittest.skip("Comment this line to test")
+  def testEvolveAllPokemons(self):
+    self.conn.evolveAllPokemons()
 
 if __name__ == '__main__':
   # Add Logs

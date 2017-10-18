@@ -98,7 +98,7 @@ class PokemonOrigins:
         logging.warning("No bonus possible for {} (already done)".format(bonus_uri))
         time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
-  def getAvailableMissionsAndPokemons(self):
+  def __getAvailableMissionsAndPokemonsForMission(self):
     """Get a list of all available missions and pokemons available to do missions
 
     return:
@@ -116,7 +116,6 @@ class PokemonOrigins:
     # Get the list of all missions and usable pokemons
     all_forms = missions_data.findAll("form")
     for form in all_forms:
-      inputs = form.findAll("input")
       # Add the mission id to the list of possible missions
       try:
         id_mission = str(form.find('input', {'name': 'id_mission'}).get("value"))
@@ -137,7 +136,7 @@ class PokemonOrigins:
 
     return available_missions, available_pokemons
 
-  def doMission(self, mission, pokemon):
+  def __doMission(self, mission, pokemon):
     """Do a mission with a pokemon
 
     Keyword arguments:
@@ -176,15 +175,15 @@ class PokemonOrigins:
     missions = []
     pokemons = []
 
-    missions, pokemons = self.getAvailableMissionsAndPokemons()
+    missions, pokemons = self.__getAvailableMissionsAndPokemonsForMission()
 
     while len(pokemons) > 0:
       while len(missions) > 0 and len(pokemons) > 0:
-        self.doMission(mission=missions[0], pokemon=pokemons[0])
+        self.__doMission(mission=missions[0], pokemon=pokemons[0])
         pokemons.remove(pokemons[0])
         missions.remove(missions[0])
 
-      missions, pokemons = self.getAvailableMissionsAndPokemons()
+      missions, pokemons = self.__getAvailableMissionsAndPokemonsForMission()
 
       # It may occur that there is no missions left for available pokemons
       # Just wait before some missions becomes available
@@ -343,7 +342,7 @@ class PokemonOrigins:
     logging.warning("Could not set pokemon {} as active".format(str(pokemon_id)))
     return False
 
-  def levelUpPokemon(self, pokemon_id):
+  def __levelUpPokemon(self, pokemon_id):
     """Level up a pokemon (if < 100) else upgrade caracteristics
 
     Keyword arguments:
@@ -372,7 +371,7 @@ class PokemonOrigins:
 
             if ("Les caractéristiques ont bien été mises à jour" in post_lvl_up.text):
               # Level up again and again until it is fully upgraded
-              while self.levelUpPokemon(pokemon_id):
+              while self.__levelUpPokemon(pokemon_id):
                 logging.debug("Trying again to upgrade Pokemon {}".format(str(pokemon_id)))
               logging.debug("Pokemon {} caracteristics upgraded".format(str(pokemon_id)))
               return True
@@ -413,12 +412,89 @@ class PokemonOrigins:
     res, active_pokemon, inactive_pokemons, is_level_100, can_level_up = self.getOwnedPokemons()
     if res:
       logging.debug("Trying to level up pokemon {}".format(str(active_pokemon)))
-      self.levelUpPokemon(active_pokemon)
+      self.__levelUpPokemon(active_pokemon)
       for pokemon in inactive_pokemons:
         logging.debug("Trying to level up pokemon {}".format(str(inactive_pokemons)))
-        self.levelUpPokemon(pokemon)
+        self.__levelUpPokemon(pokemon)
 
     return res
+
+  def __getPokemonsThatCanEvolve(self):
+    """Get a list of all pokemons that can evolve
+
+    return:
+      pokemons -- (list) All pokemon that can evolve
+    """
+    all_pokemons_that_can_evolve = []
+
+    pokemons_url = "{}/vos_pokemons.php".format(PokemonOrigins.__BASE_WEBSITE)
+    all_data = BeautifulSoup(self.session.get(url=pokemons_url).text, "html.parser")
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+    for form in all_data.findAll("form"):
+      # Find the right form
+      if form.find('input', {'name': 'action'}):
+        if form.find('input', {'name': 'action'}).get("value") == "voir_pokemon":
+          for id_pokemon in form.findAll("option"):
+            if "(peut évoluer)" in id_pokemon.text:
+              logging.debug("Pokemon {} with ID {} can evolve"
+                .format(id_pokemon.text.replace(" (peut évoluer)", ""),
+                        id_pokemon['value']))
+              all_pokemons_that_can_evolve.append(id_pokemon['value'])
+
+    return all_pokemons_that_can_evolve
+
+  def evolveAllPokemons(self):
+    """Evolve all pokemons
+
+    return:
+      evolved -- (bool) All pokemons evolved properly
+    """
+    pokemons_url = "{}/vos_pokemons.php".format(PokemonOrigins.__BASE_WEBSITE)
+
+    all_evolved_properly = True
+    pokemons_to_evolve = self.__getPokemonsThatCanEvolve()
+
+    while len(pokemons_to_evolve) > 0:
+      for pokemon in pokemons_to_evolve:
+        payload = {
+                    "action": "voir_pokemon",
+                    "pokemon": pokemon
+                  }
+        pokemon_data = BeautifulSoup(self.session.post(url=pokemons_url, data=payload).text, "html.parser")
+        time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+        for form in pokemon_data.findAll("form"):
+          # Find the right form
+          if form.find('input', {'name': 'id_pokedex_evo'}) and \
+             form.find('input', {'name': 'id'}) and \
+             form.find('input', {'name': 'evolution'}) and \
+             form.find('input', {'name': 'action'}) and \
+             form.find('input', {'name': 'pokemon'}) and \
+             form.find('input', {'name': 'id'}):
+            id_pokedex_evo = form.find('input', {'name': 'id_pokedex_evo'}).get("value")
+            id = form.find('input', {'name': 'id'}).get("value")
+            evolution = form.find('input', {'name': 'evolution'}).get("value")
+            action = form.find('input', {'name': 'action'}).get("value")
+            pokemon = form.find('input', {'name': 'pokemon'}).get("value")
+            payload = {
+                        "id_pokedex_evo": id_pokedex_evo,
+                        "id": id,
+                        "evolution": evolution,
+                        "action": action,
+                        "pokemon": pokemon
+                      }
+            evolve_result = self.session.post(url=pokemons_url, data=payload).text
+            time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+            if "a bien évolué" in evolve_result:
+              logging.debug("Pokemon {} evolved".format(pokemon))
+            else:
+              logging.warning("Pokemon {} did not evolve".format(pokemon))
+              all_evolved_properly = False
+      pokemons_to_evolve = self.__getPokemonsThatCanEvolve()
+
+    logging.debug("All pokemons evolved properly: {}".format(str(all_evolved_properly)))
+    return all_evolved_properly
 
 if __name__ == "__main__":
   """Demo on how to periodically connect and do actions to the website"""
@@ -452,11 +528,12 @@ if __name__ == "__main__":
   # Connect
   if (pkm_orig.connect(login=arg_login, password=arg_password)):
     # Do some actions in the website
-    pkm_orig.doAllBonus()
-    pkm_orig.doAllMissions()
-    pkm_orig.getOwnedGoldAndDollars()
-    pkm_orig.getOwnedPokemons()
-    pkm_orig.levelUpAllPokemons()
+    #pkm_orig.doAllBonus()
+    #pkm_orig.doAllMissions()
+    #pkm_orig.getOwnedGoldAndDollars()
+    #pkm_orig.getOwnedPokemons()
+    #pkm_orig.levelUpAllPokemons()
+    #pkm_orig.evolveAllPokemons()
     pkm_orig.disconnect()
 
     # Quit the program without error
