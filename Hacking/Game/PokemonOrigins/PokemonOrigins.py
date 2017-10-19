@@ -22,6 +22,12 @@ from bs4 import BeautifulSoup
 import re #RegExp
 import random
 
+# Python 2-3 compatibility (in order to use xrange)
+try:
+  xrange
+except NameError:
+  xrange = range
+
 class PokemonOrigins:
   """Class to do actions on pokemon-origins.com
   """
@@ -286,8 +292,7 @@ class PokemonOrigins:
 
     # Parse active and inactive pokemons from the html data
     all_pokemons = BeautifulSoup(response.text, "html.parser")
-    all_links = all_pokemons.findAll("a")
-    for link in all_links:
+    for link in all_pokemons.findAll("a"):
       if "vos_pokemons.php?id=" in link['href']:
         active_pokemon['id'] = int(link['href'].replace("vos_pokemons.php?id=", ""))
         logging.debug("Found active pokemon: {}".format(str(active_pokemon['id'])))
@@ -518,8 +523,88 @@ class PokemonOrigins:
     logging.debug("All pokemons evolved properly: {}".format(str(all_evolved_properly)))
     return all_evolved_properly
 
+  def findWildPokemons(self, x, y):
+    """Find wild pokemon in specific coordonates
+
+    Keyword arguments:
+      x -- (int) Horizontal position
+      y -- (int) Vertical position
+
+    return:
+      allPokemonsFound -- (bool) All pokemons in coordonates found (no error)
+      wildPokemons -- (list) Wild pokemons
+    """
+    wild_pokemons = []
+    all_pokemons_found = False
+
+    if self.goToInMap(x=x, y=y):
+      wild_pokemons_url = "{}/carte.php".format(PokemonOrigins.__BASE_WEBSITE)
+      wild_pokemons_data = BeautifulSoup(self.session.get(url=wild_pokemons_url).text, "html.parser")
+      time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+      # Get the list of all wild pokemons
+      div_wild_pokemons = wild_pokemons_data.find("div", {"id": "affichage_pokemons"})
+      if div_wild_pokemons:
+        for link in div_wild_pokemons.findAll("a"):
+          if "carte_action.php?id=" in link['href']:
+            wild_pokemon = int(link['href'].replace("carte_action.php?id=", ""))
+            wild_pokemons.append(wild_pokemon)
+            logging.debug("Found wild pokemon: {}".format(str(wild_pokemon)))
+        all_pokemons_found = True
+      else:
+        logging.warning("Could not parse map ({}, {}) to get wild pokemons".format(str(x), str(y)))
+    else:
+      logging.warning("Could not move to ({}, {}) in order to find pokemons".format(str(x), str(y)))
+
+    return all_pokemons_found, wild_pokemons
+
+  def findWildPokemonsInArea(self, x1, y1, x2, y2):
+    """Find wild pokemon in specific rectangle (x1, y1) -> (x2, y2)
+    Even if an error occured in a coordonate, other coordonates will be checked but
+    returned allPokemonsFound value will be False.
+
+    Keyword arguments:
+      x1 -- (int) Horizontal position of first dot of the rectangle
+      y1 -- (int) Vertical position of first dot of the rectangle
+      x2 -- (int) Horizontal position of second dot of the rectangle
+      y2 -- (int) Vertical position of second dot of the rectangle
+
+    return:
+      allPokemonsFound -- (bool) All pokemons in coordonates found (no error)
+      wildPokemons -- ([{x:, y:, pkmon:{id1, id2, ...}}, ...]) Wild pokemons with coordonates
+    """
+    wild_pokemons = []
+    all_pokemons_found = True
+
+    if x1 >= x2:
+      x_min = int(x2)
+      x_max = int(x1)
+    else:
+      x_min = int(x1)
+      x_max = int(x2)
+
+    if y1 >= y2:
+      y_min = int(y2)
+      y_max = int(y1)
+    else:
+      y_min = int(y1)
+      y_max = int(y2)
+
+    for x in xrange(x_min, x_max + 1):
+      for y in xrange(y_min, y_max + 1):
+        ok, pokemons = self.findWildPokemons(x=x, y=y)
+        if ok:
+          # Fill list with coordonates that have pokemons
+          if len(pokemons) > 0:
+            wild_pokemons.append({"x":x, "y":y, "pokemons":pokemons})
+        else:
+          all_pokemons_found = False
+          logging.warning("Could not get wild pokemons in coordonates ({}, {})".format(str(x), str(y)))
+
+    return all_pokemons_found, wild_pokemons
+
 if __name__ == "__main__":
-  """Demo on how to periodically connect and do actions to the website"""
+  """Demo on how to connect and do actions to the website"""
 
   # Add Logs
   logger = logging.getLogger()
@@ -556,6 +641,8 @@ if __name__ == "__main__":
     #pkm_orig.getOwnedPokemons()
     #pkm_orig.levelUpAllPokemons()
     #pkm_orig.evolveAllPokemons()
+    #pkm_orig.findWildPokemons(x=27, y=2)
+    #pkm_orig.findWildPokemonsInArea(x1=27, y1=2, x2=28, y2=3)
     pkm_orig.disconnect()
 
     # Quit the program without error

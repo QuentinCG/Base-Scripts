@@ -89,6 +89,11 @@ class TestPokemonOrigins(unittest.TestCase):
   def testEvolveAllPokemons(self):
     self.conn.evolveAllPokemons()
 
+  @unittest.skip("Comment this line to test")
+  def testFindWildPokemons(self):
+    self.conn.findWildPokemons(x=95, y=20)
+    self.conn.findWildPokemonsInArea(x1=95, y1=20, x2=96, y2=19)
+
 if __name__ == '__main__':
   # Add Logs
   logger = logging.getLogger()
