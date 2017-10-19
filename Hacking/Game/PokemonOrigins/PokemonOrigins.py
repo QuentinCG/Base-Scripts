@@ -271,12 +271,12 @@ class PokemonOrigins:
 
     return:
       result -- (bool) The retrieved data are correct
-      active_pokemon -- (int) Current pokemon
-      inactive_pokemons -- (list) List of all owned pokemons (not active)
+      active_pokemon -- ({"pokemon":int, "action_points":int}) Current pokemon
+      inactive_pokemons -- ([{"pokemon":int, "action_points":int}, ...]) List of all owned pokemons (not active)
       is_level_100 -- (bool) Check if the level of the current pokemon is 100
       can_level_up -- (bool) Check if the current pokemon can level up
     """
-    active_pokemon = -1
+    active_pokemon = {"id":-1, "action_points":-1}
     inactive_pokemons = []
     is_level_100 = False
     can_level_up = False
@@ -289,12 +289,27 @@ class PokemonOrigins:
     all_links = all_pokemons.findAll("a")
     for link in all_links:
       if "vos_pokemons.php?id=" in link['href']:
-        active_pokemon = int(link['href'].replace("vos_pokemons.php?id=", ""))
-        logging.debug("Found active pokemon: {}".format(str(active_pokemon)))
-      elif "carte.php?pokemon_actif=" in link['href']:
-        inactive_pokemon = int(link['href'].replace("carte.php?pokemon_actif=", ""))
-        inactive_pokemons.append(inactive_pokemon)
-        #logging.debug("Found inactive pokemon: {}".format(str(inactive_pokemon)))
+        active_pokemon['id'] = int(link['href'].replace("vos_pokemons.php?id=", ""))
+        logging.debug("Found active pokemon: {}".format(str(active_pokemon['id'])))
+
+    table_inactive = all_pokemons.find("table", id="table_pokemons_inactifs")
+    for pokemon in table_inactive.findAll("tr"):
+      if pokemon.find("a"):
+        link = pokemon.find("a")['href']
+        if "carte.php?pokemon_actif=" in link:
+          # Get the inactive pokemon ID
+          inactive_pokemon_id = int(link.replace("carte.php?pokemon_actif=", ""))
+
+          # Get the action points of the inactive pokemon
+          found_action_points = False
+          for tr in pokemon:
+            if tr.find("img"):
+              inactive_pokemon_action_point = int(re.sub("[^0-9]", "", str(tr.text)))
+              inactive_pokemons.append({'id':inactive_pokemon_id, 'action_points': inactive_pokemon_action_point})
+              logging.debug("Found inactive pokemon: {} with {} action points".format(str(inactive_pokemon_id), str(inactive_pokemon_action_point)))
+              found_action_points = True
+          if not found_action_points:
+              logging.warning("Could not get the action points of pokemon {}".format(str(inactive_pokemon_id)))
 
     # Get info to know if current pokemon is level 100
     if "px;\"> lvl 100" in response.text:
@@ -304,16 +319,23 @@ class PokemonOrigins:
       logging.debug("Current pokemon is not level 100")
 
     # Get info to know if current pokemon can level up
-    result = re.search('XP :</b> (.*)<br', response.text)
-    result = re.sub("[^0-9/]", "", str(result.group(1)))
-    current_xp, xp_to_lvl_up = result.split("/")
+    result_xp = re.search('XP :</b> (.*)<br', response.text)
+    result_xp = re.sub("[^0-9/]", "", str(result_xp.group(1)))
+    current_xp, xp_to_lvl_up = result_xp.split("/")
     if (int(current_xp) > int(xp_to_lvl_up)):
       can_level_up = True
       logging.debug("Current pokemon can level up")
     else:
       logging.debug("Current pokemon can't level up")
 
-    return (active_pokemon != -1), active_pokemon, inactive_pokemons, is_level_100, can_level_up
+    # Get info to know the remaining action points
+    result_action_points = re.search('Points d\'action :</b> (.*)<br', response.text)
+    result_action_points = re.sub("[^0-9/]", "", str(result_action_points.group(1)))
+    current_action_points, max_action_points = result_action_points.split("/")
+    active_pokemon['action_points'] = current_action_points
+    logging.debug("Action points of active pokemon: {}".format(str(active_pokemon['action_points'])))
+
+    return (active_pokemon['id'] != -1), active_pokemon, inactive_pokemons, is_level_100, can_level_up
 
   def selectMainPokemon(self, pokemon_id):
     """Select main pokemon and get some important data on it
@@ -335,7 +357,7 @@ class PokemonOrigins:
     # Confirm change
     res, active, not_actives, is_level_100, can_level_up = self.getOwnedPokemons()
 
-    if (active == pokemon_id):
+    if (active['id'] == pokemon_id):
       logging.debug("Active pokemon is now {}".format(str(pokemon_id)))
       return True
 
@@ -411,11 +433,11 @@ class PokemonOrigins:
     """
     res, active_pokemon, inactive_pokemons, is_level_100, can_level_up = self.getOwnedPokemons()
     if res:
-      logging.debug("Trying to level up pokemon {}".format(str(active_pokemon)))
-      self.__levelUpPokemon(active_pokemon)
+      logging.debug("Trying to level up pokemon {}".format(str(active_pokemon['id'])))
+      self.__levelUpPokemon(active_pokemon['id'])
       for pokemon in inactive_pokemons:
         logging.debug("Trying to level up pokemon {}".format(str(inactive_pokemons)))
-        self.__levelUpPokemon(pokemon)
+        self.__levelUpPokemon(pokemon['id'])
 
     return res
 

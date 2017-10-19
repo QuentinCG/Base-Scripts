@@ -72,14 +72,14 @@ class TestPokemonOrigins(unittest.TestCase):
   def testOwnedPokemonsAndSelectMain(self):
     res, active_pokemon, inactive_pokemons, is_level_100, can_level_up = self.conn.getOwnedPokemons()
     self.assertTrue(res)
-    self.assertNotEqual(active_pokemon, -1)
+    self.assertNotEqual(active_pokemon['id'], -1)
 
     # Try to change active pokemon by an other
     if len(inactive_pokemons) > 0:
-      self.assertTrue(self.conn.selectMainPokemon(inactive_pokemons[0]))
+      self.assertTrue(self.conn.selectMainPokemon(inactive_pokemons[0]['id']))
       res, active_pokemon_2, inactive_pokemons_2, is_level_100, can_level_up = self.conn.getOwnedPokemons()
       self.assertTrue(res)
-      self.assertEqual(inactive_pokemons[0], active_pokemon_2)
+      self.assertEqual(inactive_pokemons[0]['id'], active_pokemon_2['id'])
 
   @unittest.skip("Comment this line to test")
   def testLevelUp(self):
