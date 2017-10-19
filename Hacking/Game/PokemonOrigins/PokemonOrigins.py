@@ -306,7 +306,7 @@ class PokemonOrigins:
             if tr.find("img"):
               inactive_pokemon_action_point = int(re.sub("[^0-9]", "", str(tr.text)))
               inactive_pokemons.append({'id':inactive_pokemon_id, 'action_points': inactive_pokemon_action_point})
-              logging.debug("Found inactive pokemon: {} with {} action points".format(str(inactive_pokemon_id), str(inactive_pokemon_action_point)))
+              #logging.debug("Found inactive pokemon: {} with {} action points".format(str(inactive_pokemon_id), str(inactive_pokemon_action_point)))
               found_action_points = True
           if not found_action_points:
               logging.warning("Could not get the action points of pokemon {}".format(str(inactive_pokemon_id)))
