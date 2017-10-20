@@ -433,6 +433,11 @@ class PokemonOrigins:
   def levelUpAllPokemons(self):
     """Level up all pokemons (if < 100) else upgrade caracteristics
 
+    warning: This function is very slow as there is no way to optimize leveling up
+             For now, two pages are loaded for any pokemon you have even if
+             it can't level up or upgrade caracteristics (just to select the pokemon
+             and then check if it can level up).
+
     return:
       result -- (bool) All pokemon tried to level up
     """
@@ -603,6 +608,88 @@ class PokemonOrigins:
 
     return all_pokemons_found, wild_pokemons
 
+  def __getAllAttackIds(self):
+    """Get a list of all attack IDs in the game
+
+    return:
+      attack_ids -- ([attack_id_1, ...]) List of all attack ids
+    """
+    attack_ids = []
+
+    attack_url = "{}/pokedex_attaques.php".format(PokemonOrigins.__BASE_WEBSITE)
+    attack_ids_data = BeautifulSoup(self.session.post(url=attack_url).text, "html.parser")
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+    for form in attack_ids_data.findAll("form"):
+      # Find the right form
+      if form.find('input', {'name': 'action'}):
+        if str(form.find('input', {'name': 'action'}).get("value")) == "voir_attaque":
+          # This is the right form
+          for id_attack in form.findAll("option"):
+            attack_ids.append(int(id_attack['value']))
+
+    return attack_ids
+
+  def getAllAttacksInfo(self):
+    # Retrieve all data for every attack an put it in a dictionary
+    # TODO: Add a static dictionnary here to not use the slow method below
+
+    # This is a very slow method to get all attack informations since it
+    # needs to parse a page for each attack.
+    # It was used only only once to design the static dictionnary above
+
+    dict_attacks = {}
+    for id_attack in self.__getAllAttackIds():
+      current_attack = {}
+
+      attack_url = "{}/pokedex_attaques.php".format(PokemonOrigins.__BASE_WEBSITE)
+      payload = {
+                  "action": "voir_attaque",
+                  "id": id_attack
+                }
+      attack_data = BeautifulSoup(self.session.post(url=attack_url, data=payload).text, "html.parser")
+      time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+      for current_tab in attack_data.findAll("table"):
+        if "Attributs" in current_tab.text:
+          next_is_name = False
+          next_is_type = False
+          next_is_power = False
+          next_is_precision = False
+          next_is_class = False
+          for current_td in current_tab.findAll("td"):
+            if "Nom :" in current_td.text:
+              next_is_name = True
+            elif next_is_name:
+              current_attack["name"] = str(current_td.text)
+              next_is_name = False
+            elif "Type :" in current_td.text:
+              next_is_type = True
+            elif next_is_type:
+              current_attack["type"] = str(current_td.text)
+              next_is_type = False
+            elif "Puissance :" in current_td.text:
+              next_is_power = True
+            elif next_is_power:
+              current_attack["power"] = int(current_td.text)
+              next_is_power = False
+            elif "Précision :" in current_td.text:
+              next_is_precision = True
+            elif next_is_precision:
+              current_attack["precision"] = int(current_td.text)
+              next_is_precision = False
+            elif "Classe :" in current_td.text:
+              next_is_class = True
+            elif next_is_class:
+              current_attack["class"] = str(current_td.text)
+              next_is_class = False
+
+      # Insert the attack caracteristics in all attacks dictionnary
+      logging.debug("Found data for attack {}: {}".format(str(id_attack), str(current_attack)))
+      dict_attacks[id_attack] = current_attack
+
+    return dict_attacks
+
 if __name__ == "__main__":
   """Demo on how to connect and do actions to the website"""
 
@@ -643,6 +730,7 @@ if __name__ == "__main__":
     #pkm_orig.evolveAllPokemons()
     #pkm_orig.findWildPokemons(x=27, y=2)
     #pkm_orig.findWildPokemonsInArea(x1=27, y1=2, x2=28, y2=3)
+    #pkm_orig.getAllAttacksInfo()
     pkm_orig.disconnect()
 
     # Quit the program without error
