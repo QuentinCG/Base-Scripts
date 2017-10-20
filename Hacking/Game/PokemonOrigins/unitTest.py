@@ -94,6 +94,22 @@ class TestPokemonOrigins(unittest.TestCase):
     self.conn.findWildPokemons(x=95, y=20)
     self.conn.findWildPokemonsInArea(x1=95, y1=20, x2=96, y2=19)
 
+  @unittest.skip("Comment this line to test")
+  def testGetAllAttacks(self):
+    attacks = self.conn.getAllAttacksInfo()
+
+    # Be sure there is exactly the right number of attacks
+    self.assertEqual(len(self.conn.getAllAttacksInfo()), 354-16)
+
+    for attack in attacks.keys():
+      # Checking that all data is available for every attack
+      keys = attacks[attack].keys()
+      self.assertTrue("name" in keys)
+      self.assertTrue("type" in keys)
+      self.assertTrue("power" in keys)
+      self.assertTrue("precision" in keys)
+      self.assertTrue("class" in keys)
+
 if __name__ == '__main__':
   # Add Logs
   logger = logging.getLogger()
