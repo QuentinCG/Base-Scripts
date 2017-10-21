@@ -34,6 +34,16 @@ class PokemonOrigins:
   __WAIT_AFTER_REQUEST = 1 # Sec
   __BASE_WEBSITE = "http://www.pokemon-origins.com"
 
+  class eItemIds:
+    POKEBALL = 1
+    SUPERBALL = 2
+    HYPERBALL = 3
+    MASTERBALL = 4
+    POTION = 10
+    SUPER_POTION = 11
+    HYPER_POTION = 12
+    MAX_POTION = 13
+
   def __init__(self):
     self.session = requests.Session()
 
@@ -158,7 +168,6 @@ class PokemonOrigins:
               }
     try:
       post_mission = self.session.post(url="{}/missions.php".format(PokemonOrigins.__BASE_WEBSITE), data=payload)
-
     except requests.exceptions.ContentDecodingError:
       # This error may occur but should not break all the process
       logging.error("Error while trying to parse data from mission {} with pokemon {}".format(missions[0], pokemons[0]))
@@ -1050,6 +1059,142 @@ class PokemonOrigins:
 
     return dict_attacks
     """
+
+  def __getBestAttack(self, attack_ids):
+    """Get the best attack from a list of attack ids
+
+    Keyword arguments:
+      attack_ids -- ([]) List of all attack ids to check in order to find the best
+
+    return:
+      no_error -- (bool) No error during the function
+      attack_id -- (int) Id of the best attack
+    """
+    all_attacks = self.getAllAttacksInfo()
+    all_attack_ids = all_attacks.keys()
+
+    best_attack = -1
+    best_attack_value = -1
+
+    for attack_id in attack_ids:
+      if attack_id in all_attack_ids:
+        current_attack_value = all_attacks[attack_id]['power'] * all_attacks[attack_id]['precision']
+        if current_attack_value > best_attack_value:
+          best_attack_value = current_attack_value
+          best_attack = attack_id
+      else:
+        logging.error("Impossible to find attack id {} in known attack ids".format(str(attack_id)))
+        return False, best_attack
+
+    if best_attack != -1:
+      logging.debug("Best attack is {}".format(str(best_attack)))
+      return True, best_attack
+    else:
+      logging.warning("Impossible to find the best attack...")
+      return False, best_attack
+
+  def __runAwayFromBattle(self):
+    """Run away from battle
+
+    return:
+      no_error -- (bool) You ran away
+    """
+    surrender_url = "{}/carte.php".format(PokemonOrigins.__BASE_WEBSITE)
+    payload = {"action": "abandon"}
+    result = self.session.get(url=surrender_url, params=payload).text
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+    success = "Vous êtes actuellement en" in result
+    if success:
+      logging.debug("You ran away from battle")
+    else:
+      logging.warning("Could not run away from battle")
+    return success
+
+  def __useItemInBattle(self, id_item):
+    """Use specific item in battle
+
+    Keyword arguments:
+      id_item -- (int) Id of the item to use
+    """
+    fight_url = "{}/combat.php".format(PokemonOrigins.__BASE_WEBSITE)
+    payload = {
+               "id_item": id_item,
+               "action": "objet"
+              }
+
+    self.session.post(url=fight_url, data=payload)
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+  def __catchPokemon(self, items, retry_until_catched=True):
+    """Try to catch a pokemon
+
+    Keyword arguments:
+      items -- ({'item1':quantity, ...}) Provide items available in the fight
+      retry_until_catched -- (bool, optional) Retry until pokemon is catched or there is no pokeball left
+
+    return:
+      no_error -- (bool) No error during the function
+      catched -- (bool) The pokemon is catched
+    """
+    # Find cheapest available pokeball in items
+    id_pokeball = -1
+    item_ids = items.keys()
+    if PokemonOrigins.eItemIds.POKEBALL in item_ids:
+      if items[PokemonOrigins.eItemIds.POKEBALL] > 0:
+        id_pokeball = PokemonOrigins.eItemIds.POKEBALL
+    elif PokemonOrigins.eItemIds.SUPERBALL in item_ids:
+      if items[PokemonOrigins.eItemIds.SUPERBALL] > 0:
+        id_pokeball = PokemonOrigins.eItemIds.SUPERBALL
+    elif PokemonOrigins.eItemIds.HYPERBALL in item_ids:
+      if items[PokemonOrigins.eItemIds.HYPERBALL] > 0:
+        id_pokeball = PokemonOrigins.eItemIds.HYPERBALL
+    elif PokemonOrigins.eItemIds.MASTERBALL in item_ids:
+      if items[PokemonOrigins.eItemIds.MASTERBALL] > 0:
+        id_pokeball = PokemonOrigins.eItemIds.MASTERBALL
+
+    if id_pokeball == -1:
+      logging.debug("No pokeballs availaible in order to catch a pokemon")
+      return True, False
+
+    catch_url = "{}/combat.php".format(PokemonOrigins.__BASE_WEBSITE)
+    payload = {
+               "id_item": id_pokeball,
+               "action": "objet"
+              }
+
+    post_catch = self.session.post(url=catch_url, data=payload).text
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+    if "Félicitations! Vous avez capturé" in post_catch:
+      logging.debug("Pokemon catched")
+      return True, True
+    elif not "Quel dommage! Il parvient à sortir de là!" in post_catch:
+      logging.warning("An error occured during the catch of the pokemon")
+      return False, False
+    elif retry_until_catched:
+      # Reduce the items by one item of id_pokeball and retry as long as needed
+      items[id_pokeball] = items[id_pokeball] - 1
+      return self.__catchPokemon(items=items,
+                                 retry_until_catched=retry_until_catched)
+
+    # Pokemon not catched (and no error)
+    return True, False
+
+  def __changePokemonInBattle(self, id_pokemon):
+    """Change the curent pokemon of the battle
+
+    Keyword arguments:
+      id_pokemon -- ([]) Id of the new pokemon to use
+    """
+    fight_url = "{}/combat.php".format(PokemonOrigins.__BASE_WEBSITE)
+    payload = {
+               "pokemon": id_pokemon,
+               "action": "changer_pokemon"
+              }
+
+    self.session.post(url=fight_url, data=payload)
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
 if __name__ == "__main__":
   """Demo on how to connect and do actions to the website"""
