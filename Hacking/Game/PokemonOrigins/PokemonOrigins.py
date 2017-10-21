@@ -1590,8 +1590,10 @@ if __name__ == "__main__":
     pkm_orig.doAllBonus()
     #pkm_orig.levelUpAllPokemons()
     pkm_orig.evolveAllPokemons()
-    pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=28, y1=-10, x2=28, y2=-10, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=70)
-    #pkm_orig.doAllMissions()
+    pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=28, y1=-10, x2=29, y2=-7, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=60)
+    pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=28, y1=-4, x2=29, y2=-3, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=60)
+    pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=26, y1=2, x2=27, y2=-3, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=60)
+    pkm_orig.doAllMissions()
     pkm_orig.disconnect()
 
     # Quit the program without error
