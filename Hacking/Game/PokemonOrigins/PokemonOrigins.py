@@ -29,7 +29,7 @@ except NameError:
   xrange = range
 
 class PokemonOrigins:
-  """Class to do actions on pokemon-origins.com
+  """Class to do numerous actions on pokemon-origins.com automatically
   """
   __WAIT_AFTER_REQUEST = 1 # Sec
   __BASE_WEBSITE = "http://www.pokemon-origins.com"
@@ -1200,8 +1200,8 @@ class PokemonOrigins:
     self.session.post(url=fight_url, data=payload)
     time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
-  def catchPokemon(self, items, retry_until_catched=True):
-    """Try to catch a pokemon
+  def catchPokemonInBattle(self, items, retry_until_catched=True):
+    """Try to catch a pokemon during a battle
 
     Keyword arguments:
       items -- ({'item1':quantity, ...}) Provide items available in the fight
@@ -1249,8 +1249,8 @@ class PokemonOrigins:
     elif retry_until_catched:
       # Reduce the items by one item of id_pokeball and retry as long as needed
       items[id_pokeball] = items[id_pokeball] - 1
-      return self.catchPokemon(items=items,
-                                 retry_until_catched=retry_until_catched)
+      return self.catchPokemonInBattle(items=items,
+                                       retry_until_catched=retry_until_catched)
 
     # Pokemon not catched (and no error)
     return True, False
@@ -1381,7 +1381,6 @@ class PokemonOrigins:
   def fightAllPokemonsInBattle(self, request_catch=False):
     """Fight all pokemons of the battle or catch the pokemon
 
-    Note: The fight must be started before calling this function (use beginWildPokemonBattle function)
     The algorithm will try to kill/catch pokemons in an optimized way even if it is not perfect.
 
     Keyword arguments:
@@ -1396,7 +1395,7 @@ class PokemonOrigins:
     while still_in_battle:
       # Try to catch pokemon if it is low and it is requested
       if request_catch and ennemy_life < 30:
-        if self.catchPokemon(items):
+        if self.catchPokemonInBattle(items):
           logging.debug("Pokemon catched!")
           return True, True
         else:
@@ -1452,8 +1451,8 @@ class PokemonOrigins:
     logging.debug("Battle won!")
     return True, False
 
-  def beginWildPokemonBattleAndFight(self, wild_pokemon_id, x=-1, y=-1, request_catch=False):
-    """Launch the fight with a wild pokemon and try to kill/catch it
+  def fightWildPokemon(self, wild_pokemon_id, x=-1, y=-1, request_catch=False):
+    """Launch the fight with a wild pokemon and try to kill/catch it with an internal algorithm
 
     Keyword arguments:
       wild_pokemon_id -- (int) ID of the wild pokemon to attack
