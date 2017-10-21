@@ -1093,6 +1093,39 @@ class PokemonOrigins:
       logging.warning("Impossible to find the best attack...")
       return False, best_attack
 
+  def __beginWildPokemonBattle(self, wild_pokemon_id, x=-1, y=-1):
+    """Begin a battle againsy a wild pokemon
+
+    Keyword arguments:
+      wild_pokemon_id -- (int) ID of the wild pokemon to attack
+      x -- (int, optional) Horizontal position of the pokemon
+      y -- (int, optional) Vertical position of the pokemon
+
+    return:
+      battle_began -- (bool) No error during the function
+    """
+    if x != -1 and y != -1:
+      if not goToInMap(x, y):
+        logging.warning("Impossible to go to pokemon localisation ({}, {})".format(str(x), str(y)))
+        return False
+
+    begin_fight_url = "{}/combat.php".format(PokemonOrigins.__BASE_WEBSITE)
+    payload = {
+               "id": wild_pokemon_id,
+               "action": "combat"
+              }
+
+    post_begin_fight = self.session.post(url=begin_fight_url, data=payload).text
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+    success = not "Le pokémon n'est plus là." in post_begin_fight
+    if success:
+      logging.debug("Fight with pokemon {} began".format(str(wild_pokemon_id)))
+    else:
+      logging.warning("Impossible to fight pokemon {}".format(str(wild_pokemon_id)))
+
+    return success
+
   def __runAwayFromBattle(self):
     """Run away from battle
 
@@ -1207,19 +1240,19 @@ if __name__ == "__main__":
   arg_login = ""
   arg_password = ""
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "l:p:", ["login=", "password="])
+    opts, args = getopt.getopt(sys.argv[1:], "u:p:", ["login=", "password="])
   except getopt.GetoptError as err:
     print("[ERROR] "+str(err))
     sys.exit(1)
   for o, a in opts:
-    if o in ("-l", "--login"):
+    if o in ("-u", "--user"):
       arg_login = str(a)
     elif o in ("-p", "--password"):
       arg_password = str(a)
     else:
-      print("[ERROR] Not handled parameters (only login (-l) and password (-p) available.")
+      print("[ERROR] Not handled parameters (only user (-u) and password (-p) available.")
   if arg_login == "" or arg_password == "":
-    print("[ERROR] Login (-l) and password (-p) must be provided.")
+    print("[ERROR] user (-u) and password (-p) must be provided.")
     sys.exit(1)
 
   # Instantiate the class
