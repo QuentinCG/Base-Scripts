@@ -298,8 +298,8 @@ class PokemonOrigins:
 
     return:
       result -- (bool) The retrieved data are correct
-      active_pokemon -- ({"pokemon":int, "action_points":int}) Current pokemon
-      inactive_pokemons -- ([{"pokemon":int, "action_points":int}, ...]) List of all owned pokemons (not active)
+      active_pokemon -- ({"id":int, "action_points":int}) Current pokemon
+      inactive_pokemons -- ([{"id":int, "action_points":int}, ...]) List of all owned pokemons (not active)
       is_level_100 -- (bool) Check if the level of the current pokemon is 100
       can_level_up -- (bool) Check if the current pokemon can level up
     """
@@ -362,6 +362,29 @@ class PokemonOrigins:
     logging.debug("Action points of active pokemon: {}".format(str(active_pokemon['action_points'])))
 
     return (active_pokemon['id'] != -1), active_pokemon, inactive_pokemons, is_level_100, can_level_up
+
+  def getOwnedPokemonsWithActionPoints(self):
+    """Get the pokemons of the account having action points
+
+    return:
+      pokemons_with_ap -- ([]) List of all owned pokemons (active and inactive) having action points
+    """
+    result, active_pokemon, inactive_pokemons, is_level_100, can_level_up = self.getOwnedPokemons()
+
+    pokemons_with_ap = []
+    if not result:
+      logging.warning("An error occured while getting the pokemon informations")
+      return pokemons_with_ap
+
+    if active_pokemon['action_points'] > 0:
+      pokemons_with_ap.append(active_pokemon['id'])
+
+    for pokemons in inactive_pokemons:
+      if pokemon['action_points'] > 0:
+        pokemons_with_ap.append(pokemon['id'])
+
+    logging.debug("Pokemons with AP: {}".format(str(pokemons_with_ap)))
+    return pokemons_with_ap
 
   def selectMainPokemon(self, pokemon_id):
     """Select main pokemon and get some important data on it
@@ -1123,7 +1146,7 @@ class PokemonOrigins:
       battle_began -- (bool) No error during the function
     """
     if x != -1 and y != -1:
-      if not goToInMap(x, y):
+      if not self.goToInMap(x, y):
         logging.warning("Impossible to go to pokemon localisation ({}, {})".format(str(x), str(y)))
         return False
 
@@ -1136,11 +1159,11 @@ class PokemonOrigins:
     post_begin_fight = self.session.post(url=begin_fight_url, data=payload).text
     time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
-    success = not "Le pokémon n'est plus là." in post_begin_fight
+    success = (not "Le pokémon n'est plus là." in post_begin_fight) and ("Utiliser une attaque" in post_begin_fight)
     if success:
       logging.debug("Fight with pokemon {} began".format(str(wild_pokemon_id)))
     else:
-      logging.warning("Impossible to fight pokemon {}".format(str(wild_pokemon_id)))
+      logging.warning("Impossible to fight pokemon {} (not there or current pokemon can't fight)".format(str(wild_pokemon_id)))
 
     return success
 
@@ -1302,7 +1325,7 @@ class PokemonOrigins:
       ennemy_life -- (int) Life of ennemy pokemon (in %)
     """
     attack_url = "{}/combat.php".format(PokemonOrigins.__BASE_WEBSITE)
-    get_attack = self.session.get(url=attack_url, data=payload).text
+    get_attack = self.session.get(url=attack_url).text
     time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
     attacks = []
@@ -1354,6 +1377,96 @@ class PokemonOrigins:
     logging.debug("Current pokemon life: {}%".format(str(current_life)))
     logging.debug("Ennemy life: {}%".format(str(ennemy_life)))
     return True, attacks, items, other_pokemons, current_life, ennemy_life
+
+  def fightAllPokemonsInBattle(self, request_catch=False):
+    """Fight all pokemons of the battle or catch the pokemon
+
+    Note: The fight must be started before calling this function (use beginWildPokemonBattle function)
+    The algorithm will try to kill/catch pokemons in an optimized way even if it is not perfect.
+
+    Keyword arguments:
+      request_catch -- (bool, optional) Catch the pokemon (by default, it's not trying to catch it)
+
+    return:
+      fight_won -- (bool) The fight was won (if pokemon catched, the fight is considered as won)
+      pokemon_catched -- (bool) Pokemon catched (will always be false if catching pokemon was not requested)
+    """
+    still_in_battle, attacks, items, other_pokemons, current_life, ennemy_life = self.getBattleInformations()
+
+    while still_in_battle:
+      # Try to catch pokemon if it is low and it is requested
+      if request_catch and ennemy_life < 30:
+        if self.catchPokemon(items):
+          logging.debug("Pokemon catched!")
+          return True, True
+        else:
+          logging.warning("Could not catch the pokemon, let's try to kill it")
+          request_catch = False
+
+      # Attack the pokemon
+      no_error, attack_success, ennemy_is_dead, ennemy_went_away, you_are_dead = self.attackInBattle(self.getBestAttack(attacks))
+      # Update all data
+      still_in_battle, attacks, items, other_pokemons, current_life, ennemy_life = self.getBattleInformations()
+      if not no_error:
+        logging.warning("An error occured during attack, aborting...")
+        return False, False
+      if ennemy_went_away:
+        logging.warning("Ennemy went away... This is the end of the battle")
+        return False, False
+
+      # Change pokemon if low chance to win or dead
+      if (current_life <= 20 and ennemy_life > current_life) or you_are_dead:
+        if len(other_pokemons) > 0:
+          self.changePokemonInBattle(other_pokemons[0])
+        else:
+          logging.warning("All our pokemons are low life or dead, running away from the fight")
+          self.runAwayFromBattle()
+          return False, False
+      elif current_life < 50:
+        # Try to use a potion if the pokemon is low life but not that much
+        potion_used = False
+        item_ids = items.keys()
+        if PokemonOrigins.eItemIds.POTION in items.keys():
+          if items[PokemonOrigins.eItemIds.POTION] > 0:
+            self.useItemInBattle(PokemonOrigins.eItemIds.POTION)
+            potion_used = True
+        if (not potion_used) and PokemonOrigins.eItemIds.SUPER_POTION in items.keys():
+          if items[PokemonOrigins.eItemIds.SUPER_POTION] > 0:
+            self.useItemInBattle(PokemonOrigins.eItemIds.SUPER_POTION)
+            potion_used = True
+        if (not potion_used) and PokemonOrigins.eItemIds.HYPER_POTION in items.keys():
+          if items[PokemonOrigins.eItemIds.HYPER_POTION] > 0:
+            self.useItemInBattle(PokemonOrigins.eItemIds.HYPER_POTION)
+            potion_used = True
+        if (not potion_used) and PokemonOrigins.eItemIds.MAX_POTION in items.keys():
+          if items[PokemonOrigins.eItemIds.MAX_POTION] > 0:
+            self.useItemInBattle(PokemonOrigins.eItemIds.MAX_POTION)
+            potion_used = True
+
+        if not potion_used:
+          logging.warning("No available potion to heal the pokemon")
+
+      # Update all data
+      still_in_battle, attacks, items, other_pokemons, current_life, ennemy_life = self.getBattleInformations()
+
+    logging.debug("Battle won!")
+    return True, False
+
+  def beginWildPokemonBattleAndFight(self, wild_pokemon_id, x=-1, y=-1, request_catch=False):
+    """Launch the fight with a wild pokemon and try to kill/catch it
+
+    Keyword arguments:
+      wild_pokemon_id -- (int) ID of the wild pokemon to attack
+      x -- (int, optional) Horizontal position of the pokemon
+      y -- (int, optional) Vertical position of the pokemon
+      request_catch -- (bool, optional) Catch the pokemon (by default, it's not trying to catch it)
+
+    return:
+      fight_won -- (bool) The fight was won (if pokemon catched, the fight is considered as won)
+      pokemon_catched -- (bool) Pokemon catched (will always be false if catching pokemon was not requested)
+    """
+    if self.beginWildPokemonBattle(wild_pokemon_id=wild_pokemon_id, x=x, y=y):
+      return self.fightAllPokemonsInBattle(request_catch=request_catch)
 
 if __name__ == "__main__":
   """Demo on how to connect and do actions to the website"""
