@@ -426,14 +426,15 @@ class PokemonOrigins:
     # Confirm change
     res, active, not_actives, is_level_100, can_level_up = self.getOwnedPokemons()
 
-    if (active['id'] == pokemon_id):
-      logging.debug("Active pokemon is now {}".format(str(pokemon_id)))
-      return True
-
     # Upgrade selected pokemon
     if upgrade_pokemon and can_level_up:
       if self.levelUpPokemon(pokemon_id):
         can_level_up = False
+
+    if (active['id'] == pokemon_id):
+      logging.debug("Active pokemon is now {}".format(str(pokemon_id)))
+      return True
+
 
     logging.warning("Could not set pokemon {} as active".format(str(pokemon_id)))
     return False
