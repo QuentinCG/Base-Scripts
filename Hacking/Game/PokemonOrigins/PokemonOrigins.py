@@ -303,7 +303,7 @@ class PokemonOrigins:
       is_level_100 -- (bool) Check if the level of the current pokemon is 100
       can_level_up -- (bool) Check if the current pokemon can level up
     """
-    active_pokemon = {"id":-1, "action_points":-1, "level"=-1}
+    active_pokemon = {"id":-1, "action_points":-1, "level":-1}
     inactive_pokemons = []
     is_level_100 = False
     can_level_up = False
@@ -346,6 +346,8 @@ class PokemonOrigins:
 
           if found_action_points and found_pokemon_level:
             inactive_pokemons.append(dict_pokemon)
+          else:
+            logging.warning("No level or action points found for pokemon {}".format(str(inactive_pokemon_id)))
 
     # Get info to know if current pokemon is level 100
     if "px;\"> lvl 100" in response.text:
@@ -357,6 +359,7 @@ class PokemonOrigins:
       index_level = response.text.index("px;\"> lvl ") + 10
       found_level = response.text[index_level:index_level+3]
       active_pokemon['level'] = int(re.sub("[^0-9]", "", found_level))
+      logging.debug("Current pokemon is level {}".format(str(active_pokemon['level'])))
 
     # Get info to know if current pokemon can level up
     result_xp = re.search('XP :</b> (.*)<br', response.text)
@@ -1587,19 +1590,11 @@ if __name__ == "__main__":
   # Connect
   if (pkm_orig.connect(login=arg_login, password=arg_password)):
     # Do some actions in the website
-    #pkm_orig.doAllBonus()
-    #pkm_orig.doAllMissions()
-    #pkm_orig.getOwnedGoldAndDollars()
-    #pkm_orig.getOwnedPokemons()
+    pkm_orig.doAllBonus()
     #pkm_orig.levelUpAllPokemons()
-    #pkm_orig.evolveAllPokemons()
-    #pkm_orig.findWildPokemons(x=27, y=2)
-    #pkm_orig.findWildPokemonsInArea(x1=27, y1=2, x2=28, y2=3)
-    #pkm_orig.getAllAttacksInfo()
-    #pkm_orig.beginWildPokemonBattle(4244679)
-    #pkm_orig.attackInBattle(70)
-    #pkm_orig.getBattleInformations()
-    #pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=97, y1=22, x2=97, y2=23, request_catch=True, number_of_requested_win_or_catch=2, level_requirement=70)
+    pkm_orig.evolveAllPokemons()
+    pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=28, y1=-10, x2=28, y2=-10, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=70)
+    #pkm_orig.doAllMissions()
     pkm_orig.disconnect()
 
     # Quit the program without error
