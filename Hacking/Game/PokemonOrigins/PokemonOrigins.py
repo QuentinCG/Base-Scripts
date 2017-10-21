@@ -1272,6 +1272,71 @@ class PokemonOrigins:
     logging.debug("Your pokemon is dead: {}".format(str(you_are_dead)))
     return True, attack_success, ennemy_is_dead, ennemy_went_away, you_are_dead
 
+  def getBattleInformations(self):
+    """Get important informations from the battle
+
+    return:
+      still_in_battle -- (bool) There is still a battle taking place
+      attacks -- ([]) List of available attacks to use from current pokemon
+      items -- ({item_id1:quantity1, ...}) List of all items with associated quantity
+      other_pokemons -- ([]) List of other pokemons usable in the fight
+      current_life -- (int) Current life of current pokemon (in %)
+      ennemy_life -- (int) Life of ennemy pokemon (in %)
+    """
+    attack_url = "{}/combat.php".format(PokemonOrigins.__BASE_WEBSITE)
+    get_attack = self.session.get(url=attack_url, data=payload).text
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+    attacks = []
+    items = {}
+    other_pokemons = []
+    current_life = -1
+    ennemy_life = -1
+
+    still_in_battle = not ("Le pokémon n'est plus là" in get_attack)
+    if not still_in_battle:
+      logging.debug("There is no fight")
+      return False, attacks, items, other_pokemons, current_life, ennemy_life
+
+    battle_data = BeautifulSoup(get_attack, "html.parser")
+
+    for form in battle_data.findAll("form"):
+      inputs = form.findAll("input")
+      if form.find('input', {'name': 'attaque'}):
+        # Grab attacks
+        for attack in form.findAll('input', {'name': 'attaque'}):
+          attacks.append(int(attack['value']))
+      elif form.find('select', {'name': 'pokemon'}):
+        # Grab other pokemons
+        for pokemon in form.findAll('option'):
+          other_pokemons.append(int(pokemon['value']))
+      elif form.find('input', {'name': 'id_item'}):
+        # Grab items (ids and number of elements of each item then combine them together)
+        item_numbers = [int(s) for s in form.text.replace('(', ' ').replace(')', ' ').split() if s.isdigit()]
+        for item in form.findAll('input', {'name': 'id_item'}):
+          items[int(item['value'])] =  item_numbers.pop(0)
+        if len(item_numbers) > 0:
+          logging.error("An error occured during the parsing to get fight data")
+          return False, attacks, items, other_pokemons, current_life, ennemy_life
+
+    # Grab current life
+    for status_img in battle_data.find('p', id="texte_combat_bas").findAll('img'):
+      if "images/barre/" in status_img['src']:
+        current_life = int(status_img['src'].replace("images/barre/", "").replace(".png", ""))
+
+    # Grab ennemy life
+    for status_ennemy_img in battle_data.find('p', id="texte_combat_haut").findAll('img'):
+      if "images/barre/" in status_ennemy_img['src']:
+        ennemy_life = int(status_ennemy_img['src'].replace("images/barre/", "").replace(".png", ""))
+
+    logging.debug("Fight is active")
+    logging.debug("Attacks: {}".format(str(attacks)))
+    logging.debug("Items: {}".format(str(items)))
+    logging.debug("Other pokemons: {}".format(str(other_pokemons)))
+    logging.debug("Current pokemon life: {}%".format(str(current_life)))
+    logging.debug("Ennemy life: {}%".format(str(ennemy_life)))
+    return True, attacks, items, other_pokemons, current_life, ennemy_life
+
 if __name__ == "__main__":
   """Demo on how to connect and do actions to the website"""
 
@@ -1315,6 +1380,7 @@ if __name__ == "__main__":
     #pkm_orig.getAllAttacksInfo()
     #pkm_orig.beginWildPokemonBattle(4244679)
     #pkm_orig.attackInBattle(70)
+    #pkm_orig.getBattleInformations()
     pkm_orig.disconnect()
 
     # Quit the program without error
