@@ -1093,7 +1093,7 @@ class PokemonOrigins:
       logging.warning("Impossible to find the best attack...")
       return False, best_attack
 
-  def __beginWildPokemonBattle(self, wild_pokemon_id, x=-1, y=-1):
+  def beginWildPokemonBattle(self, wild_pokemon_id, x=-1, y=-1):
     """Begin a battle againsy a wild pokemon
 
     Keyword arguments:
@@ -1229,6 +1229,49 @@ class PokemonOrigins:
     self.session.post(url=fight_url, data=payload)
     time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
+  def attackInBattle(self, id_attack):
+    """Attack the current pokemon with a specific attack
+
+    Keyword arguments:
+      id_attack -- (int) Attack to use
+
+    return:
+      no_error -- (bool) No error during the function
+      attack_success -- (bool) The attack was a success
+      ennemy_is_dead -- (bool) The ennemy pokemon is dead (does not mean the
+                               fight is over if fighting someone with more than
+                               1 pokemon)
+      ennemy_went_away -- (bool) The ennemy pokemon went away (battle is finished)
+      you_are_dead -- (bool) Your current pokemon is dead
+    """
+    attack_url = "{}/combat.php".format(PokemonOrigins.__BASE_WEBSITE)
+    payload = {
+               "attaque": id_attack,
+               "action": "attaque"
+              }
+
+    post_attack = self.session.post(url=attack_url, data=payload).text
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+    if "Le pokémon n'est plus là" in post_attack:
+      logging.warning("An error occured during the attack, the pokemon is not here anymore")
+      return False, False, False, True, False
+
+    ennemy_went_away = ("Le pokémon prend la fuite" in post_attack)
+    ennemy_is_dead = ("Vous avez gagné!" in post_attack)
+    you_are_dead = ("Votre pokémon est K.O." in post_attack)
+
+    if not "l'attaque a échoué." in BeautifulSoup(post_attack, "html.parser").find("div", id="description_combat").find("div").text:
+      attack_success = True
+    else:
+      attack_success = False
+
+    logging.debug("Attack success: {}".format(str(attack_success)))
+    logging.debug("Ennemy is dead: {}".format(str(ennemy_is_dead)))
+    logging.debug("Ennemy went away: {}".format(str(ennemy_went_away)))
+    logging.debug("Your pokemon is dead: {}".format(str(you_are_dead)))
+    return True, attack_success, ennemy_is_dead, ennemy_went_away, you_are_dead
+
 if __name__ == "__main__":
   """Demo on how to connect and do actions to the website"""
 
@@ -1270,6 +1313,8 @@ if __name__ == "__main__":
     #pkm_orig.findWildPokemons(x=27, y=2)
     #pkm_orig.findWildPokemonsInArea(x1=27, y1=2, x2=28, y2=3)
     #pkm_orig.getAllAttacksInfo()
+    #pkm_orig.beginWildPokemonBattle(4244679)
+    #pkm_orig.attackInBattle(70)
     pkm_orig.disconnect()
 
     # Quit the program without error
