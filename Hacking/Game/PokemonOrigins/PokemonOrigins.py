@@ -299,11 +299,11 @@ class PokemonOrigins:
     return:
       result -- (bool) The retrieved data are correct
       active_pokemon -- ({"id":int, "action_points":int}) Current pokemon
-      inactive_pokemons -- ([{"id":int, "action_points":int}, ...]) List of all owned pokemons (not active)
+      inactive_pokemons -- ([{"id":int, "action_points":int, "level":int}, ...]) List of all owned pokemons (not active)
       is_level_100 -- (bool) Check if the level of the current pokemon is 100
       can_level_up -- (bool) Check if the current pokemon can level up
     """
-    active_pokemon = {"id":-1, "action_points":-1}
+    active_pokemon = {"id":-1, "action_points":-1, "level"=-1}
     inactive_pokemons = []
     is_level_100 = False
     can_level_up = False
@@ -328,21 +328,35 @@ class PokemonOrigins:
 
           # Get the action points of the inactive pokemon
           found_action_points = False
+          dict_pokemon = {}
+          dict_pokemon['id'] = int(inactive_pokemon_id)
           for tr in pokemon:
             if tr.find("img"):
-              inactive_pokemon_action_point = int(re.sub("[^0-9]", "", str(tr.text)))
-              inactive_pokemons.append({'id':inactive_pokemon_id, 'action_points': inactive_pokemon_action_point})
-              #logging.debug("Found inactive pokemon: {} with {} action points".format(str(inactive_pokemon_id), str(inactive_pokemon_action_point)))
+              dict_pokemon['action_points'] = int(re.sub("[^0-9]", "", str(tr.text)))
               found_action_points = True
           if not found_action_points:
               logging.warning("Could not get the action points of pokemon {}".format(str(inactive_pokemon_id)))
 
+          # Get the level of the pokemon
+          found_pokemon_level = False
+          for td in pokemon:
+            if "level " in td.text:
+              dict_pokemon['level'] = int(td.text.replace("lvl ", ""))
+              found_pokemon_level = True
+
+          if found_action_points and found_pokemon_level:
+            inactive_pokemons.append(dict_pokemon)
+
     # Get info to know if current pokemon is level 100
     if "px;\"> lvl 100" in response.text:
       is_level_100 = True
+      active_pokemon['level'] = 100
       logging.debug("Current pokemon is level 100")
     else:
       logging.debug("Current pokemon is not level 100")
+      index_level = response.text.index("px;\"> lvl ") + 10
+      found_level = response.text[index_level:index_level+3]
+      active_pokemon['level'] = int(re.sub("[^0-9]", "", found_level))
 
     # Get info to know if current pokemon can level up
     result_xp = re.search('XP :</b> (.*)<br', response.text)
@@ -363,8 +377,11 @@ class PokemonOrigins:
 
     return (active_pokemon['id'] != -1), active_pokemon, inactive_pokemons, is_level_100, can_level_up
 
-  def getOwnedPokemonsWithActionPoints(self):
+  def getOwnedPokemonsWithActionPoints(self, level_requirement=-1):
     """Get the pokemons of the account having action points
+
+    Keyword arguments:
+      level_requirement -- (int, optional) If specified, get only pokemons with level >= level_requirement
 
     return:
       pokemons_with_ap -- ([]) List of all owned pokemons (active and inactive) having action points
@@ -377,11 +394,13 @@ class PokemonOrigins:
       return pokemons_with_ap
 
     if active_pokemon['action_points'] > 0:
-      pokemons_with_ap.append(active_pokemon['id'])
+      if level_requirement == -1 or active_pokemon['level'] >= level_requirement:
+        pokemons_with_ap.append(active_pokemon['id'])
 
     for pokemon in inactive_pokemons:
       if pokemon['action_points'] > 0:
-        pokemons_with_ap.append(pokemon['id'])
+        if level_requirement == -1 or pokemon['level'] >= level_requirement:
+          pokemons_with_ap.append(pokemon['id'])
 
     logging.debug("Pokemons with AP: {}".format(str(pokemons_with_ap)))
     return pokemons_with_ap
@@ -413,13 +432,16 @@ class PokemonOrigins:
     logging.warning("Could not set pokemon {} as active".format(str(pokemon_id)))
     return False
 
-  def selectAnyMainPokemonWithAp(self):
+  def selectAnyMainPokemonWithAp(self, level_requirement=-1):
     """Select a random pokemon which has AP
+
+    Keyword arguments:
+      level_requirement -- (int, optional) If specified, use only pokemons with level >= level_requirement
 
     return:
       result -- (bool) A pokemon with AP is the main pokemon
     """
-    pokemons = self.getOwnedPokemonsWithActionPoints()
+    pokemons = self.getOwnedPokemonsWithActionPoints(level_requirement=level_requirement)
     if len(pokemons) > 0:
       return self.selectMainPokemon(pokemons[0])
     else:
@@ -1485,7 +1507,7 @@ class PokemonOrigins:
     else:
       return False, False
 
-  def fightAnyWildPokemonInAreaWithAnyPokemon(self, x1, y1, x2, y2, request_catch=False, number_of_requested_win_or_catch=1):
+  def fightAnyWildPokemonInAreaWithAnyPokemon(self, x1, y1, x2, y2, request_catch=False, number_of_requested_win_or_catch=1, level_requirement=-1):
     """Try to kill/catch a specific number of pokemons in a specific area (all intelligence is in the function)
 
     Keyword arguments:
@@ -1495,6 +1517,7 @@ class PokemonOrigins:
       y2 -- (int) Vertical position of second dot of the rectangle
       request_catch -- (bool, optional) Catch the pokemons (by default, it's not trying to catch them)
       number_of_requested_win_or_catch -- (int) Number of pokemons should be killed/catchedv(-1 for unlimited)
+      level_requirement -- (int, optional) If specified, use only pokemons with level >= level_requirement
 
     return:
       no_error -- (bool) No error during the function call
@@ -1516,7 +1539,7 @@ class PokemonOrigins:
             logging.debug("{} wild pokemons killed".format(str(number_of_won_fights)))
             return True, number_of_won_fights, number_of_catched_pokemons
           # Use a pokemon with enough AP
-          elif self.selectAnyMainPokemonWithAp():
+          elif self.selectAnyMainPokemonWithAp(level_requirement=level_requirement):
             # Try to kill/catch the wild pokemon
             fight_won, pokemon_catched = self.fightWildPokemon(wild_pokemon_id=wild_pokemon, x=area['x'], y=area['y'], request_catch=request_catch)
             if fight_won:
@@ -1543,19 +1566,19 @@ if __name__ == "__main__":
   arg_login = ""
   arg_password = ""
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "u:p:", ["login=", "password="])
+    opts, args = getopt.getopt(sys.argv[1:], "u:p:", ["username=", "password="])
   except getopt.GetoptError as err:
     print("[ERROR] "+str(err))
     sys.exit(1)
   for o, a in opts:
-    if o in ("-u", "--user"):
+    if o in ("-u", "--username"):
       arg_login = str(a)
     elif o in ("-p", "--password"):
       arg_password = str(a)
     else:
-      print("[ERROR] Not handled parameters (only user (-u) and password (-p) available.")
+      print("[ERROR] Not handled parameters (only username (-u) and password (-p) available.")
   if arg_login == "" or arg_password == "":
-    print("[ERROR] user (-u) and password (-p) must be provided.")
+    print("[ERROR] username (-u) and password (-p) must be provided.")
     sys.exit(1)
 
   # Instantiate the class
@@ -1576,7 +1599,7 @@ if __name__ == "__main__":
     #pkm_orig.beginWildPokemonBattle(4244679)
     #pkm_orig.attackInBattle(70)
     #pkm_orig.getBattleInformations()
-    #pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=97, y1=22, x2=97, y2=23, request_catch=True, number_of_requested_win_or_catch=2)
+    #pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=97, y1=22, x2=97, y2=23, request_catch=True, number_of_requested_win_or_catch=2, level_requirement=70)
     pkm_orig.disconnect()
 
     # Quit the program without error
