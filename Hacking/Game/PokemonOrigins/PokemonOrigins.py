@@ -47,6 +47,8 @@ class PokemonOrigins:
   def __init__(self):
     self.session = requests.Session()
 
+################### Connection settings ###################
+
   def connect(self, login, password):
     """Connect to the website with specific identification
 
@@ -93,6 +95,8 @@ class PokemonOrigins:
 
     return result
 
+########################## Bonus ##########################
+
   def doAllBonus(self):
     """Do all 3 bonus to get in-game gold
     """
@@ -113,6 +117,8 @@ class PokemonOrigins:
       else:
         logging.warning("No bonus possible for {} (already done)".format(bonus_uri))
         time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+######################## Missions #########################
 
   def getAvailableMissionsAndPokemonsForMission(self):
     """Get a list of all available missions and pokemons available to do missions
@@ -205,6 +211,8 @@ class PokemonOrigins:
       if len(missions) <= 0 and len(pokemons) > 0:
         time.sleep(60)
 
+########################### Map ############################
+
   def goToInMap(self, x, y):
     """Move to specific coordonates in the map
 
@@ -236,6 +244,8 @@ class PokemonOrigins:
       logging.warning("Could not move to ({},{})".format(str(int(x)), str(int(y))))
 
     return result
+
+########################## Utils ##########################
 
   def stopTips(self):
     """Stop showing tips in the map page
@@ -280,6 +290,8 @@ class PokemonOrigins:
         return True, gold, dollars
 
     return False, gold, dollars
+
+######################## Pokemons #########################
 
   def getOwnedPokemons(self):
     """Get the pokemons of the account
@@ -537,6 +549,8 @@ class PokemonOrigins:
     logging.debug("All pokemons evolved properly: {}".format(str(all_evolved_properly)))
     return all_evolved_properly
 
+################ Wild pokemons information ################
+
   def findWildPokemons(self, x, y):
     """Find wild pokemon in specific coordonates
 
@@ -616,6 +630,8 @@ class PokemonOrigins:
           logging.warning("Could not get wild pokemons in coordonates ({}, {})".format(str(x), str(y)))
 
     return all_pokemons_found, wild_pokemons
+
+################### Attacks for battle ####################
 
   def getAllAttackIds(self):
     """Get a list of all attack IDs in the game
@@ -1092,6 +1108,8 @@ class PokemonOrigins:
     else:
       logging.warning("Impossible to find the best attack...")
       return False, best_attack
+
+######################### Battle ##########################
 
   def beginWildPokemonBattle(self, wild_pokemon_id, x=-1, y=-1):
     """Begin a battle againsy a wild pokemon
