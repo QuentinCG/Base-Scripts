@@ -114,7 +114,7 @@ class PokemonOrigins:
         logging.warning("No bonus possible for {} (already done)".format(bonus_uri))
         time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
-  def __getAvailableMissionsAndPokemonsForMission(self):
+  def getAvailableMissionsAndPokemonsForMission(self):
     """Get a list of all available missions and pokemons available to do missions
 
     return:
@@ -152,7 +152,7 @@ class PokemonOrigins:
 
     return available_missions, available_pokemons
 
-  def __doMission(self, mission, pokemon):
+  def doMission(self, mission, pokemon):
     """Do a mission with a pokemon
 
     Keyword arguments:
@@ -190,15 +190,15 @@ class PokemonOrigins:
     missions = []
     pokemons = []
 
-    missions, pokemons = self.__getAvailableMissionsAndPokemonsForMission()
+    missions, pokemons = self.getAvailableMissionsAndPokemonsForMission()
 
     while len(pokemons) > 0:
       while len(missions) > 0 and len(pokemons) > 0:
-        self.__doMission(mission=missions[0], pokemon=pokemons[0])
+        self.doMission(mission=missions[0], pokemon=pokemons[0])
         pokemons.remove(pokemons[0])
         missions.remove(missions[0])
 
-      missions, pokemons = self.__getAvailableMissionsAndPokemonsForMission()
+      missions, pokemons = self.getAvailableMissionsAndPokemonsForMission()
 
       # It may occur that there is no missions left for available pokemons
       # Just wait before some missions becomes available
@@ -378,7 +378,7 @@ class PokemonOrigins:
     logging.warning("Could not set pokemon {} as active".format(str(pokemon_id)))
     return False
 
-  def __levelUpPokemon(self, pokemon_id):
+  def levelUpPokemon(self, pokemon_id):
     """Level up a pokemon (if < 100) else upgrade caracteristics
 
     Keyword arguments:
@@ -407,7 +407,7 @@ class PokemonOrigins:
 
             if ("Les caractéristiques ont bien été mises à jour" in post_lvl_up.text):
               # Level up again and again until it is fully upgraded
-              while self.__levelUpPokemon(pokemon_id):
+              while self.levelUpPokemon(pokemon_id):
                 logging.debug("Trying again to upgrade Pokemon {}".format(str(pokemon_id)))
               logging.debug("Pokemon {} caracteristics upgraded".format(str(pokemon_id)))
               return True
@@ -453,14 +453,14 @@ class PokemonOrigins:
     res, active_pokemon, inactive_pokemons, is_level_100, can_level_up = self.getOwnedPokemons()
     if res:
       logging.debug("Trying to level up pokemon {}".format(str(active_pokemon['id'])))
-      self.__levelUpPokemon(active_pokemon['id'])
+      self.levelUpPokemon(active_pokemon['id'])
       for pokemon in inactive_pokemons:
         logging.debug("Trying to level up pokemon {}".format(str(inactive_pokemons)))
-        self.__levelUpPokemon(pokemon['id'])
+        self.levelUpPokemon(pokemon['id'])
 
     return res
 
-  def __getPokemonsThatCanEvolve(self):
+  def getPokemonsThatCanEvolve(self):
     """Get a list of all pokemons that can evolve
 
     return:
@@ -494,7 +494,7 @@ class PokemonOrigins:
     pokemons_url = "{}/vos_pokemons.php".format(PokemonOrigins.__BASE_WEBSITE)
 
     all_evolved_properly = True
-    pokemons_to_evolve = self.__getPokemonsThatCanEvolve()
+    pokemons_to_evolve = self.getPokemonsThatCanEvolve()
 
     while len(pokemons_to_evolve) > 0:
       for pokemon in pokemons_to_evolve:
@@ -532,7 +532,7 @@ class PokemonOrigins:
             else:
               logging.warning("Pokemon {} did not evolve".format(pokemon))
               all_evolved_properly = False
-      pokemons_to_evolve = self.__getPokemonsThatCanEvolve()
+      pokemons_to_evolve = self.getPokemonsThatCanEvolve()
 
     logging.debug("All pokemons evolved properly: {}".format(str(all_evolved_properly)))
     return all_evolved_properly
@@ -617,7 +617,7 @@ class PokemonOrigins:
 
     return all_pokemons_found, wild_pokemons
 
-  def __getAllAttackIds(self):
+  def getAllAttackIds(self):
     """Get a list of all attack IDs in the game
 
     return:
@@ -1008,7 +1008,7 @@ class PokemonOrigins:
     # Function used to grab the dictionary:
     """
     dict_attacks = {}
-    for id_attack in self.__getAllAttackIds():
+    for id_attack in self.getAllAttackIds():
       current_attack = {}
 
       attack_url = "{}/pokedex_attaques.php".format(PokemonOrigins.__BASE_WEBSITE)
@@ -1060,7 +1060,7 @@ class PokemonOrigins:
     return dict_attacks
     """
 
-  def __getBestAttack(self, attack_ids):
+  def getBestAttack(self, attack_ids):
     """Get the best attack from a list of attack ids
 
     Keyword arguments:
@@ -1126,7 +1126,7 @@ class PokemonOrigins:
 
     return success
 
-  def __runAwayFromBattle(self):
+  def runAwayFromBattle(self):
     """Run away from battle
 
     return:
@@ -1144,7 +1144,7 @@ class PokemonOrigins:
       logging.warning("Could not run away from battle")
     return success
 
-  def __useItemInBattle(self, id_item):
+  def useItemInBattle(self, id_item):
     """Use specific item in battle
 
     Keyword arguments:
@@ -1159,7 +1159,7 @@ class PokemonOrigins:
     self.session.post(url=fight_url, data=payload)
     time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
-  def __catchPokemon(self, items, retry_until_catched=True):
+  def catchPokemon(self, items, retry_until_catched=True):
     """Try to catch a pokemon
 
     Keyword arguments:
@@ -1208,13 +1208,13 @@ class PokemonOrigins:
     elif retry_until_catched:
       # Reduce the items by one item of id_pokeball and retry as long as needed
       items[id_pokeball] = items[id_pokeball] - 1
-      return self.__catchPokemon(items=items,
+      return self.catchPokemon(items=items,
                                  retry_until_catched=retry_until_catched)
 
     # Pokemon not catched (and no error)
     return True, False
 
-  def __changePokemonInBattle(self, id_pokemon):
+  def changePokemonInBattle(self, id_pokemon):
     """Change the curent pokemon of the battle
 
     Keyword arguments:
