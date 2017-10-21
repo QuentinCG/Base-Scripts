@@ -334,15 +334,11 @@ class PokemonOrigins:
             if tr.find("img"):
               dict_pokemon['action_points'] = int(re.sub("[^0-9]", "", str(tr.text)))
               found_action_points = True
+            if "level " in tr.text:
+              dict_pokemon['level'] = int(tr.text.replace("lvl ", ""))
+              found_pokemon_level = True
           if not found_action_points:
               logging.warning("Could not get the action points of pokemon {}".format(str(inactive_pokemon_id)))
-
-          # Get the level of the pokemon
-          found_pokemon_level = False
-          for td in pokemon:
-            if "level " in td.text:
-              dict_pokemon['level'] = int(td.text.replace("lvl ", ""))
-              found_pokemon_level = True
 
           if found_action_points and found_pokemon_level:
             inactive_pokemons.append(dict_pokemon)
