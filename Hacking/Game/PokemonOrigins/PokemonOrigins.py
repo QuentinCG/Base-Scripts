@@ -1527,6 +1527,11 @@ class PokemonOrigins:
     number_of_won_fights = 0
     number_of_catched_pokemons = 0
 
+    # Call this function in order to not do time consuming actions for nothing
+    if not self.selectAnyMainPokemonWithAp(level_requirement=level_requirement):
+      logging.warning("No pokemon available for the fights")
+      return False, number_of_won_fights, number_of_catched_pokemons
+
     all_pokemons_found, areas = self.findWildPokemonsInArea(x1=x1, y1=y1, x2=x2, y2=y2)
     if (len(areas) != 0) or number_of_requested_win_or_catch == -1:
       for area in areas:
