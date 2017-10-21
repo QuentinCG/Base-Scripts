@@ -405,11 +405,12 @@ class PokemonOrigins:
     logging.debug("Pokemons with AP: {}".format(str(pokemons_with_ap)))
     return pokemons_with_ap
 
-  def selectMainPokemon(self, pokemon_id):
+  def selectMainPokemon(self, pokemon_id, upgrade_pokemon=True):
     """Select main pokemon and get some important data on it
 
     Keyword arguments:
       pokemon_id -- (int) Inactive pokemon id to set as active
+      upgrade_pokemon -- (bool, optional) Upgrade selected pokemon by default
 
     return:
       result -- (bool) The retrieved data are correct
@@ -428,6 +429,11 @@ class PokemonOrigins:
     if (active['id'] == pokemon_id):
       logging.debug("Active pokemon is now {}".format(str(pokemon_id)))
       return True
+
+    # Upgrade selected pokemon
+    if upgrade_pokemon and can_level_up:
+      if self.levelUpPokemon(pokemon_id):
+        can_level_up = False
 
     logging.warning("Could not set pokemon {} as active".format(str(pokemon_id)))
     return False
@@ -456,7 +462,7 @@ class PokemonOrigins:
     return:
       result -- (bool) Pokemon level up
     """
-    if self.selectMainPokemon(pokemon_id=pokemon_id):
+    if self.selectMainPokemon(pokemon_id=pokemon_id, upgrade_pokemon=False):
       res, active_pokemon, inactive_pokemons, is_level_100, can_level_up = self.getOwnedPokemons()
       if res:
         if can_level_up:
