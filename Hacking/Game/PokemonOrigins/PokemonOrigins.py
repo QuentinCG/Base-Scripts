@@ -358,7 +358,7 @@ class PokemonOrigins:
     result_action_points = re.search('Points d\'action :</b> (.*)<br', response.text)
     result_action_points = re.sub("[^0-9/]", "", str(result_action_points.group(1)))
     current_action_points, max_action_points = result_action_points.split("/")
-    active_pokemon['action_points'] = current_action_points
+    active_pokemon['action_points'] = int(current_action_points)
     logging.debug("Action points of active pokemon: {}".format(str(active_pokemon['action_points'])))
 
     return (active_pokemon['id'] != -1), active_pokemon, inactive_pokemons, is_level_100, can_level_up
@@ -379,7 +379,7 @@ class PokemonOrigins:
     if active_pokemon['action_points'] > 0:
       pokemons_with_ap.append(active_pokemon['id'])
 
-    for pokemons in inactive_pokemons:
+    for pokemon in inactive_pokemons:
       if pokemon['action_points'] > 0:
         pokemons_with_ap.append(pokemon['id'])
 
@@ -412,6 +412,18 @@ class PokemonOrigins:
 
     logging.warning("Could not set pokemon {} as active".format(str(pokemon_id)))
     return False
+
+  def selectAnyMainPokemonWithAp(self):
+    """Select a random pokemon which has AP
+
+    return:
+      result -- (bool) A pokemon with AP is the main pokemon
+    """
+    pokemons = self.getOwnedPokemonsWithActionPoints()
+    if len(pokemons) > 0:
+      return self.selectMainPokemon(pokemons[0])
+    else:
+      return False
 
   def levelUpPokemon(self, pokemon_id):
     """Level up a pokemon (if < 100) else upgrade caracteristics
@@ -582,8 +594,8 @@ class PokemonOrigins:
       y -- (int) Vertical position
 
     return:
-      allPokemonsFound -- (bool) All pokemons in coordonates found (no error)
-      wildPokemons -- (list) Wild pokemons
+      all_pokemons_found -- (bool) All pokemons in coordonates found (no error)
+      wild_pokemons -- (list) Wild pokemons
     """
     wild_pokemons = []
     all_pokemons_found = False
@@ -612,7 +624,7 @@ class PokemonOrigins:
   def findWildPokemonsInArea(self, x1, y1, x2, y2):
     """Find wild pokemon in specific rectangle (x1, y1) -> (x2, y2)
     Even if an error occured in a coordonate, other coordonates will be checked but
-    returned allPokemonsFound value will be False.
+    returned all_pokemons_found value will be False.
 
     Keyword arguments:
       x1 -- (int) Horizontal position of first dot of the rectangle
@@ -621,8 +633,8 @@ class PokemonOrigins:
       y2 -- (int) Vertical position of second dot of the rectangle
 
     return:
-      allPokemonsFound -- (bool) All pokemons in coordonates found (no error)
-      wildPokemons -- ([{x:, y:, pkmon:{id1, id2, ...}}, ...]) Wild pokemons with coordonates
+      all_pokemons_found -- (bool) All pokemons in coordonates found (no error)
+      wild_pokemons -- ([{'x':pos_x, 'y':pos_y, 'pokemons':{id1, id2, ...}}, ...]) Wild pokemons with coordonates
     """
     wild_pokemons = []
     all_pokemons_found = True
@@ -1383,6 +1395,8 @@ class PokemonOrigins:
 
     The algorithm will try to kill/catch pokemons in an optimized way even if it is not perfect.
 
+    Warning: Be sure your current pokemon has enough AP else it will not work
+
     Keyword arguments:
       request_catch -- (bool, optional) Catch the pokemon (by default, it's not trying to catch it)
 
@@ -1454,6 +1468,8 @@ class PokemonOrigins:
   def fightWildPokemon(self, wild_pokemon_id, x=-1, y=-1, request_catch=False):
     """Launch the fight with a wild pokemon and try to kill/catch it with an internal algorithm
 
+    Warning: Be sure your current pokemon has enough AP else it will not work
+
     Keyword arguments:
       wild_pokemon_id -- (int) ID of the wild pokemon to attack
       x -- (int, optional) Horizontal position of the pokemon
@@ -1466,6 +1482,55 @@ class PokemonOrigins:
     """
     if self.beginWildPokemonBattle(wild_pokemon_id=wild_pokemon_id, x=x, y=y):
       return self.fightAllPokemonsInBattle(request_catch=request_catch)
+    else:
+      return False, False
+
+  def fightAnyWildPokemonInAreaWithAnyPokemon(self, x1, y1, x2, y2, request_catch=False, number_of_requested_win_or_catch=1):
+    """Try to kill/catch a specific number of pokemons in a specific area (all intelligence is in the function)
+
+    Keyword arguments:
+      x1 -- (int) Horizontal position of first dot of the rectangle
+      y1 -- (int) Vertical position of first dot of the rectangle
+      x2 -- (int) Horizontal position of second dot of the rectangle
+      y2 -- (int) Vertical position of second dot of the rectangle
+      request_catch -- (bool, optional) Catch the pokemons (by default, it's not trying to catch them)
+      number_of_requested_win_or_catch -- (int) Number of pokemons should be killed/catchedv(-1 for unlimited)
+
+    return:
+      no_error -- (bool) No error during the function call
+      number_of_won_fights -- (int) Number of won fights (may be less than the requested fights to win)
+      number_of_catched_pokemons -- (int)  Number of won catched pokemons (may be less than the requested fights to win)
+    """
+    number_of_won_fights = 0
+    number_of_catched_pokemons = 0
+
+    all_pokemons_found, areas = self.findWildPokemonsInArea(x1=x1, y1=y1, x2=x2, y2=y2)
+    if (len(areas) != 0) or number_of_requested_win_or_catch == -1:
+      for area in areas:
+        for wild_pokemon in area['pokemons']:
+          # Check if we are done with requirements (number of pokemons to kill/catch)
+          if request_catch and number_of_catched_pokemons >= number_of_requested_win_or_catch and number_of_requested_win_or_catch != -1:
+            logging.debug("{} pokemons catched".format(str(number_of_catched_pokemons)))
+            return True, number_of_won_fights, number_of_catched_pokemons
+          elif (not request_catch) and number_of_won_fights >= number_of_requested_win_or_catch and number_of_requested_win_or_catch != -1:
+            logging.debug("{} wild pokemons killed".format(str(number_of_won_fights)))
+            return True, number_of_won_fights, number_of_catched_pokemons
+          # Use a pokemon with enough AP
+          elif self.selectAnyMainPokemonWithAp():
+            # Try to kill/catch the wild pokemon
+            fight_won, pokemon_catched = self.fightWildPokemon(wild_pokemon_id=wild_pokemon, x=area['x'], y=area['y'], request_catch=request_catch)
+            if fight_won:
+              number_of_won_fights = number_of_won_fights + 1
+            if pokemon_catched:
+              number_of_catched_pokemons = number_of_catched_pokemons + 1
+          else:
+            logging.warning("No pokemon with AP remaining.")
+            return True, number_of_won_fights, number_of_catched_pokemons
+    else:
+      logging.warning("Request is impossible as there is no pokemon")
+      return False, 0, 0
+
+    return True, number_of_won_fights, number_of_catched_pokemons
 
 if __name__ == "__main__":
   """Demo on how to connect and do actions to the website"""
@@ -1511,6 +1576,7 @@ if __name__ == "__main__":
     #pkm_orig.beginWildPokemonBattle(4244679)
     #pkm_orig.attackInBattle(70)
     #pkm_orig.getBattleInformations()
+    #pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=97, y1=22, x2=97, y2=23, request_catch=True, number_of_requested_win_or_catch=2)
     pkm_orig.disconnect()
 
     # Quit the program without error
