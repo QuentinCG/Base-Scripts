@@ -38,5 +38,10 @@ if __name__ == '__main__':
       print("All bonus done")
       conn.doAllMissions()
       print("All missions done")
+
+      if conn.disconnect():
+        print("Disconnected")
+      else:
+        print("Not disconnected...")
     else:
       print("Could not connect to {}".format(account['login']))
