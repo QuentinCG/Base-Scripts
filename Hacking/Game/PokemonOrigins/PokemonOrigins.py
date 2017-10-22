@@ -8,8 +8,8 @@ __author__ = 'Quentin Comte-Gaz'
 __email__ = "quentin@comte-gaz.com"
 __license__ = "MIT License"
 __copyright__ = "Copyright Quentin Comte-Gaz (2017)"
-__python_version__ = "2.7+ and 3.+"
-__version__ = "1.0 (2017/10/13)"
+__python_version__ = "3.+"
+__version__ = "1.0 (2017/10/22)"
 __status__ = "Usable"
 __dependency__ = "request & bs4"
 
@@ -43,6 +43,46 @@ class PokemonOrigins:
     SUPER_POTION = 11
     HYPER_POTION = 12
     MAX_POTION = 13
+
+  class eDracoportLocalization:
+    BOURG_PALETTE = 1
+    JADIELLE = 2
+    WEST_JADIELLE = 3
+    SOUTH_JADIELLE = 4
+    SOUTH_ARGENTA = 5
+    EST_ARGENTA = 6
+    ARGENTA = 7
+    MINE = 8
+    AZURIA = 9
+    SOUTH_EST_AZURIA = 10
+    BREEDERS_HOUSE = 11
+    SAFRANIA = 12
+    EST_SAFRANIA = 13
+    CARMIN_SUR_MER = 14
+    CELADOPOLE = 15
+    BICYCLE = 16
+    SOUTH_BICYCLE = 17
+    MIDDLE_BICYCLE = 18
+    PARMANIE = 19
+    SAFARI_PARK = 20
+    EST_CARMIN_SUR_MER = 21
+    EST_PARMANIE = 22
+    ICE_ISLAND = 23
+    CRAMOISILE = 24
+    VICTORY_ROAD = 25
+    SOUTH_VICTORY_ROAD = 26
+    POKEMON_LEAGUE = 27
+    BOURG_GEON = 28
+    MAUVILLE = 29
+    ECORSIA = 30
+    DOUBLONVILLE = 31
+    # Undefined id 32
+    ACAJOU = 33
+    ROSALIA = 34
+    EBENELLE = 35
+    OLIVILLE = 36
+    IRISIA = 37
+    BOURG_EN_VOL = 38
 
   def __init__(self):
     self.session = requests.Session()
@@ -290,6 +330,64 @@ class PokemonOrigins:
         return True, gold, dollars
 
     return False, gold, dollars
+
+######################## Dracoport ########################
+
+  def useDracoport(self, dracoport_localization):
+    """Go to a specific place with the dracoport
+
+    Keyword arguments:
+      dracoport_localization -- (PokemonOrigins.eDracoportLocalization) Dracoport localization
+
+    return:
+      success -- (bool) Used dracoport with success
+    """
+    dracoport_url = "{}/dracoport.php".format(PokemonOrigins.__BASE_WEBSITE)
+
+    # Grab all data needed to go to a specific place
+    id = int(dracoport_localization)
+    price = -1
+    x = -1
+    y = -1
+    found_data = 0
+    all_data = BeautifulSoup(self.session.get(url=dracoport_url).text, "html.parser")
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+    data = all_data.find("table", id="profil")
+    for form in data.findAll("form"):
+      if form.find('input', {'name': 'id'}):
+        if int(form.find('input', {'name': 'id'}).get("value")) == int(dracoport_localization):
+          # Found the right localization to go, sol let's grab all inputs needed to go to this place
+          for input in form.findAll("input"):
+            if input.get("name") == "cout":
+              price = int(input.get("value"))
+              found_data = found_data + 1
+            if input.get("name") == "pos_hor":
+              x = int(input.get("value"))
+              found_data = found_data + 1
+            if input.get("name") == "pos_ver":
+              y = int(input.get("value"))
+              found_data = found_data + 1
+
+    # Be sure we grabbed all data needed for the request to use dracoport
+    if found_data == 3:
+      payload = {
+                  "id": id,
+                  "cout": price,
+                  "pos_hor": x,
+                  "pos_ver": y
+                }
+      result = self.session.post(url=dracoport_url, data=payload)
+      time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+      success = "Vous êtes arrivé à destination!" in result.text
+      if success:
+        logging.debug("You used the dracoport to go to place {}".format(str(dracoport_localization)))
+      else:
+        logging.warning("Could not use the dracoport to go to place {} (x={}, y={}, price={})".format(str(dracoport_localization), str(x), str(y), str(price)))
+    else:
+      logging.warning("Could not find data relative to the localization you want to go")
+      return False
+
+    return success
 
 ######################## Pokemons #########################
 
