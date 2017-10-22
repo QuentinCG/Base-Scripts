@@ -1717,9 +1717,48 @@ if __name__ == "__main__":
     if arg_evolve_all_pokemons:
       pkm_orig.evolveAllPokemons()
     if arg_demo_fight:
-      pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=28, y1=-10, x2=29, y2=-7, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=60)
-      pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=28, y1=-4, x2=29, y2=-3, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=60)
-      pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=26, y1=2, x2=27, y2=-3, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=60)
+      # Go to pokemon league by foot or with dracoport
+      if not pkm_orig.goToInMap(x=28, y=-10):
+        pkm_orig.useDracoport(PokemonOrigins.eDracoportLocalization.POKEMON_LEAGUE)
+      # Pokemon league
+      if pkm_orig.goToInMap(x=28, y=-10):
+        pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=28, y1=-10, x2=29, y2=-7, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=50)
+        pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=28, y1=-4, x2=29, y2=-3, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=50)
+        pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=26, y1=2, x2=27, y2=-3, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=50)
+        # Going into cave near pokemon league
+        if pkm_orig.goToInMap(x=30, y=-5):
+          pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=30, y1=-5, x2=30, y2=-5, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=50)
+          pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=31, y1=-9, x2=31, y2=2, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=50)
+          pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=32, y1=-9, x2=32, y2=2, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=50)
+          pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=33, y1=-9, x2=33, y2=2, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=50)
+          pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=34, y1=-9, x2=34, y2=2, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=50)
+          pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=35, y1=-9, x2=35, y2=2, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=50)
+          if pkm_orig.goToInMap(x=36, y=-4):
+            pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=36, y1=-4, x2=36, y2=-4, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=40)
+            pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=40, y1=-8, x2=41, y2=3, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=35)
+            pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=43, y1=-8, x2=44, y2=3, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=30)
+            pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=46, y1=-8, x2=47, y2=3, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=30)
+            # Go back to first place
+            if pkm_orig.goToInMap(x=41, y=-4):
+              if pkm_orig.goToInMap(x=35, y=-4):
+                if pkm_orig.goToInMap(x=30, y=-5):
+                  if pkm_orig.goToInMap(x=28, y=-10):
+                    logging.debug("All fight demo done with success")
+                  else:
+                    logging.warning("Impossible to go back to (28, -10)")
+                else:
+                  logging.warning("Impossible to go back to (30, -5)")
+              else:
+                logging.warning("Impossible to go back to (35, -4)")
+            else:
+              logging.warning("Impossible to go back to (41, -4)")
+
+        if not pkm_orig.goToInMap(x=28, y=-10):
+          if pkm_orig.useDracoport(PokemonOrigins.eDracoportLocalization.POKEMON_LEAGUE):
+            logging.debug("Used dracoport to go back to pokemon league...")
+          else:
+            logging.warning("Impossible to go back to pokemon league...")
+
     if arg_level_up_all_pokemons:
       pkm_orig.levelUpAllPokemons()
     if arg_do_all_missions:
