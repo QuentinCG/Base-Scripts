@@ -45,22 +45,21 @@ if __name__ == '__main__':
   if send_email:
     html_error_output = "<p>List of usernames that can't log in: "
     html_table_output = "List of all accounts:<br/><p><table border=1, cellpadding=3 cellspacing=1>"
-    html_table_output += "<tr><td>Username</td><td>Gold</td><td>Dollars</td></tr>"
+    html_table_output += "<tr><td>Username</td><td>Gold</td><td>Dollars</td><td>Score</td><td>Rank</td><td>Pokemons</td></tr>"
 
-  conn_main = PokemonOrigins.PokemonOrigins()
-  if conn_main.connect(login=main_account['login'], password=main_account['password']):
-      print("Connected to {}".format(main_account['login']))
-      if send_email:
-        success, gold, dollars = conn_main.getOwnedGoldAndDollars()
-        if success:
-          print("This account has {} gold and {} dollars".format(str(gold), str(dollars)))
-          html_table_output += "<tr><td>{} (main account)</td><td>{}</td><td>{}</td></tr>".format(main_account['login'], str(gold), str(dollars))
-        else:
-          print("Could not get gold and dollars from the account...")
-          if send_email:
-            html_error_output += "{}, ".format(main_account['login'])
-  else:
-    print("Could not connect to {}".format(main_account['login']))
+    conn_main = PokemonOrigins.PokemonOrigins()
+    if conn_main.connect(login=main_account['login'], password=main_account['password']):
+        print("Connected to {}".format(main_account['login']))
+          success, gold, dollars, score, rank, owned_pokemons, max_pokemons = conn_main.getAccountInfo()
+          if success:
+            print("This account has {} gold and {} dollars".format(str(gold), str(dollars)))
+            html_table_output += "<tr><td>{} (main account)</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}/{}</td></tr>".format(main_account['login'],
+                                   str(gold), str(dollars), str(score), str(rank), str(owned_pokemons), str(max_pokemons))
+          else:
+            print("Could not get gold and dollars from the account...")
+              html_error_output += "{}, ".format(main_account['login'])
+    else:
+      print("Could not connect to {}".format(main_account['login']))
 
   # Do the actions with all specified accounts
   for account in accounts:
@@ -73,10 +72,11 @@ if __name__ == '__main__':
       print("All missions done")
 
       if send_email:
-        success, gold, dollars = conn.getOwnedGoldAndDollars()
+        success, gold, dollars, score, rank, owned_pokemons, max_pokemons = conn.getAccountInfo()
         if success:
           print("This account has {} gold and {} dollars".format(str(gold), str(dollars)))
-          html_table_output += "<tr><td>{}</td><td>{}</td><td>{}</td></tr>".format(account['login'], str(gold), str(dollars))
+          html_table_output += "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}/{}</td></tr>".format(account['login'],
+                                 str(gold), str(dollars), str(score), str(rank), str(owned_pokemons), str(max_pokemons))
         else:
           print("Could not get gold and dollars from the account...")
 

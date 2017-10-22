@@ -298,16 +298,24 @@ class PokemonOrigins:
     self.session.get(url=stop_tips_url, params=payload)
     time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
-  def getOwnedGoldAndDollars(self):
+  def getAccountInfo(self):
     """Get the dollars and gold amount of the account
 
     return:
       result -- (bool) The retrieved data are correct
       gold -- (int) Gold (-1 if error)
       dollars -- (int) Dollars (-1 if error)
+      score -- (int) Score (-1 if error)
+      rank -- (int) Rank (-1 if error)
+      owned_pokemons -- (int) Number of owned pokemons (-1 if error)
+      max_pokemons -- (int) Number of maximum pokemons the account can have (-1 if error)
     """
     gold = -1
     dollars = -1
+    score = -1
+    rank = -1
+    owned_pokemons = -1
+    max_pokemons = -1
 
     all_data = BeautifulSoup(self.session.get(url=PokemonOrigins.__BASE_WEBSITE).text,
                              "html.parser")
@@ -326,10 +334,26 @@ class PokemonOrigins:
       elif next_is_gold:
         data_gold = bold.text.replace(" ", "")
         gold = int(data_gold)
+        next_is_gold = False
         logging.debug("Found {} gold in this account".format(str(gold)))
-        return True, gold, dollars
+      elif "Score : " in bold.text:
+        score = int(bold.text.replace("Score : ", ""))
+        logging.debug("Found score of {} on this account".format(str(score)))
+      elif "Rang : " in bold.text:
+        rank = int(bold.text.replace("Rang : ", ""))
+        logging.debug("Found rank of {} on this account".format(str(rank)))
+      elif "BDS : " in bold.text:
+        res = re.sub("[^0-9/]", "", str(bold.text)).split("/")
+        if len(res) == 2:
+          owned_pokemons = int(res[0])
+          max_pokemons = int(res[1])
+          logging.debug("{}/{} pokemons available on this account".format(str(owned_pokemons), str(max_pokemons)))
+          return True, gold, dollars, score, rank, owned_pokemons, max_pokemons
+        else:
+          logging.warning("Error while getting the number of owned pokemons and max pokemons")
+          return False, gold, dollars, score, rank, owned_pokemons, max_pokemons
 
-    return False, gold, dollars
+    return False, gold, dollars, score, rank, owned_pokemons, max_pokemons
 
 ######################## Dracoport ########################
 
