@@ -45,16 +45,17 @@ if __name__ == '__main__':
   if send_email:
     html_error_output = "<p>List of usernames that can't log in: "
     html_table_output = "<p>List of all accounts:<br/><table border=1, cellpadding=3 cellspacing=1>"
-    html_table_output += "<tr><td>Username</td><td>Gold</td><td>Dollars</td><td>Score</td><td>Rank</td><td>Pokemons</td></tr>"
+    html_table_output += "<tr><td>Username</td><td>Gold</td><td>Dollars</td><td>Score</td><td>Rank</td><td>Pokemons</td><td>Current principal quest</td></tr>"
 
     conn_main = PokemonOrigins.PokemonOrigins()
     if conn_main.connect(login=main_account['login'], password=main_account['password']):
         print("Connected to {}".format(main_account['login']))
         success, gold, dollars, score, rank, owned_pokemons, max_pokemons = conn_main.getAccountInfo()
+        current_quest = conn_main.getAccountPrincipalQuest()
         if success:
           print("This account has {} gold and {} dollars".format(str(gold), str(dollars)))
-          html_table_output += "<tr><td>{} (main account)</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}/{}</td></tr>".format(main_account['login'],
-                                 str(gold), str(dollars), str(score), str(rank), str(owned_pokemons), str(max_pokemons))
+          html_table_output += "<tr><td>{} (main account)</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}/{}</td><td>{}</td></tr>".format(main_account['login'],
+                                 str(gold), str(dollars), str(score), str(rank), str(owned_pokemons), str(max_pokemons), str(current_quest))
         else:
           print("Could not get gold and dollars from the account...")
             html_error_output += "{}, ".format(main_account['login'])
@@ -73,10 +74,11 @@ if __name__ == '__main__':
 
       if send_email:
         success, gold, dollars, score, rank, owned_pokemons, max_pokemons = conn.getAccountInfo()
+        current_quest = conn.getAccountPrincipalQuest()
         if success:
           print("This account has {} gold and {} dollars".format(str(gold), str(dollars)))
-          html_table_output += "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}/{}</td></tr>".format(account['login'],
-                                 str(gold), str(dollars), str(score), str(rank), str(owned_pokemons), str(max_pokemons))
+          html_table_output += "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}/{}</td><td>{}</td></tr>".format(account['login'],
+                                 str(gold), str(dollars), str(score), str(rank), str(owned_pokemons), str(max_pokemons), str(current_quest))
         else:
           print("Could not get gold and dollars from the account...")
 

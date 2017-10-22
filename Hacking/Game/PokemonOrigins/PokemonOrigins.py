@@ -1949,15 +1949,18 @@ class PokemonOrigins:
 
     current_quest = -1
 
-    # Get the list of all missions and usable pokemons
-    for b in quests_data.findAll("b"):
-      if "Quête n°" in b.text:
-        quest = int(re.sub("[^0-9/]", "", str(b.text)))
-        if quest > current_quest:
-          current_quest = quest
-    if current_quest == -1:
-      logging.error("Could not find the current quest of this account...")
-      return current_quest
+    if "Vous devriez aller voir le professeur Chen." in quests_data.text:
+      current_quest = 0
+    else:
+      # Get the list of all missions and usable pokemons
+      for b in quests_data.findAll("b"):
+        if "Quête n°" in b.text:
+          quest = int(re.sub("[^0-9/]", "", str(b.text)))
+          if quest > current_quest:
+            current_quest = quest
+      if current_quest == -1:
+        logging.error("Could not find the current quest of this account...")
+        return current_quest
 
     logging.debug("Current quest of this account is {}".format(str(current_quest)))
     return current_quest
