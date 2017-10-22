@@ -1715,6 +1715,7 @@ if __name__ == "__main__":
 
   # Connect
   if (pkm_orig.connect(login=arg_login, password=arg_password)):
+    print("Connected to {}".format(arg_login))
     # Do some actions in the website
     if arg_do_bonus:
       pkm_orig.doAllBonus()
@@ -1781,10 +1782,14 @@ if __name__ == "__main__":
       pkm_orig.doAllMissions()
       print("All missions done")
 
-    pkm_orig.disconnect()
+    if pkm_orig.disconnect():
+      print("Disconnected")
+    else:
+      print("Could not disconnect...")
 
     # Quit the program without error
     sys.exit(0)
 
   # Could not connect...
+  print("Could not connect to {}...".format(arg_login))
   sys.exit(2)
