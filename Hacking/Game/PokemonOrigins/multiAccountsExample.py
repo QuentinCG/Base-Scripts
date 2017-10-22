@@ -58,7 +58,7 @@ if __name__ == '__main__':
                                  str(gold), str(dollars), str(score), str(rank), str(owned_pokemons), str(max_pokemons), str(current_quest))
         else:
           print("Could not get gold and dollars from the account...")
-            html_error_output += "{}, ".format(main_account['login'])
+          html_error_output += "{}, ".format(main_account['login'])
     else:
       print("Could not connect to {}".format(main_account['login']))
 
