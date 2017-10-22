@@ -73,7 +73,7 @@ if __name__ == '__main__':
       print("All missions done")
 
       if send_email:
-        success, gold, dollars = conn.getOwnedGoldAndDollars(self)
+        success, gold, dollars = conn.getOwnedGoldAndDollars()
         if success:
           print("This account has {} gold and {} dollars".format(str(gold), str(dollars)))
           html_table_output += "<tr><td>{}</td><td>{}</td><td>{}</td></tr>".format(account['login'], str(gold), str(dollars))
