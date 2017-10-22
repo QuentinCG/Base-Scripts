@@ -1936,6 +1936,32 @@ class PokemonOrigins:
       logging.warning("Principal quest {} is not handled yet...".format(str(quest_id)))
       return False
 
+  def getAccountPrincipalQuest(self):
+    """Get the current principal quest of the account
+
+    return:
+      current_quest -- (int) Current quest of the account (-1 if an error occured)
+    """
+    quests_url = "{}/journaldesquetes.php".format(PokemonOrigins.__BASE_WEBSITE)
+
+    quests_data = BeautifulSoup(self.session.get(url=quests_url).text, "html.parser")
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+    current_quest = -1
+
+    # Get the list of all missions and usable pokemons
+    for b in quests_data.findAll("b"):
+      if "Quête n°" in b.text:
+        quest = int(re.sub("[^0-9/]", "", str(b.text)))
+        if quest > current_quest:
+          current_quest = quest
+    if current_quest == -1:
+      logging.error("Could not find the current quest of this account...")
+      return current_quest
+
+    logging.debug("Current quest of this account is {}".format(str(current_quest)))
+    return current_quest
+
 if __name__ == "__main__":
   """Demo on how to connect and do actions to the website"""
 
