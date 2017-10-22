@@ -44,20 +44,20 @@ if __name__ == '__main__':
   send_email = (datetime.datetime.now().hour == 10)
   if send_email:
     html_error_output = "<p>List of usernames that can't log in: "
-    html_table_output = "List of all accounts:<br/><p><table border=1, cellpadding=3 cellspacing=1>"
+    html_table_output = "<p>List of all accounts:<br/><table border=1, cellpadding=3 cellspacing=1>"
     html_table_output += "<tr><td>Username</td><td>Gold</td><td>Dollars</td><td>Score</td><td>Rank</td><td>Pokemons</td></tr>"
 
     conn_main = PokemonOrigins.PokemonOrigins()
     if conn_main.connect(login=main_account['login'], password=main_account['password']):
         print("Connected to {}".format(main_account['login']))
-          success, gold, dollars, score, rank, owned_pokemons, max_pokemons = conn_main.getAccountInfo()
-          if success:
-            print("This account has {} gold and {} dollars".format(str(gold), str(dollars)))
-            html_table_output += "<tr><td>{} (main account)</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}/{}</td></tr>".format(main_account['login'],
-                                   str(gold), str(dollars), str(score), str(rank), str(owned_pokemons), str(max_pokemons))
-          else:
-            print("Could not get gold and dollars from the account...")
-              html_error_output += "{}, ".format(main_account['login'])
+        success, gold, dollars, score, rank, owned_pokemons, max_pokemons = conn_main.getAccountInfo()
+        if success:
+          print("This account has {} gold and {} dollars".format(str(gold), str(dollars)))
+          html_table_output += "<tr><td>{} (main account)</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}/{}</td></tr>".format(main_account['login'],
+                                 str(gold), str(dollars), str(score), str(rank), str(owned_pokemons), str(max_pokemons))
+        else:
+          print("Could not get gold and dollars from the account...")
+            html_error_output += "{}, ".format(main_account['login'])
     else:
       print("Could not connect to {}".format(main_account['login']))
 
@@ -93,14 +93,13 @@ if __name__ == '__main__':
     html_table_output += "</table></p>"
     html_error_output += "</p>"
 
-    html_full = "<html> <head></head> <body>"
-    html_full += "Pokemon origins logs:<br/><br/>"
+    html_full = "<html><head></head><body>"
     html_full += html_table_output
     html_full += html_error_output
     html_full += "</body></html>"
 
     msg = MIMEMultipart('alternative')
-    msg['Subject'] = "Pokemon Origins Logs"
+    msg['Subject'] = "Pokemon-Origins logs"
     msg['From'] = email_sender_address
     msg['To'] = email_receiver_address
     msg.attach(MIMEText(html_full, 'html'))
