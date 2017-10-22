@@ -415,7 +415,7 @@ class PokemonOrigins:
 
 ######################## Pokemons #########################
 
-  def getOwnedPokemons(self):
+  def getOwnedPokemons(self, auto_level_up=True):
     """Get the pokemons of the account
 
     return:
@@ -487,6 +487,8 @@ class PokemonOrigins:
     if (int(current_xp) > int(xp_to_lvl_up)):
       can_level_up = True
       logging.debug("Current pokemon can level up")
+      if auto_level_up:
+        self.levelUpPokemon(active_pokemon['id'])
     else:
       logging.debug("Current pokemon can't level up")
 
@@ -527,12 +529,11 @@ class PokemonOrigins:
     logging.debug("Pokemons with AP: {}".format(str(pokemons_with_ap)))
     return pokemons_with_ap
 
-  def selectMainPokemon(self, pokemon_id, upgrade_pokemon=True):
+  def selectMainPokemon(self, pokemon_id):
     """Select main pokemon and get some important data on it
 
     Keyword arguments:
       pokemon_id -- (int) Inactive pokemon id to set as active
-      upgrade_pokemon -- (bool, optional) Upgrade selected pokemon by default
 
     return:
       result -- (bool) The retrieved data are correct
@@ -547,11 +548,6 @@ class PokemonOrigins:
 
     # Confirm change
     res, active, not_actives, is_level_100, can_level_up = self.getOwnedPokemons()
-
-    # Upgrade selected pokemon
-    if upgrade_pokemon and can_level_up:
-      if self.levelUpPokemon(pokemon_id):
-        can_level_up = False
 
     if (active['id'] == pokemon_id):
       logging.debug("Active pokemon is now {}".format(str(pokemon_id)))
@@ -585,8 +581,8 @@ class PokemonOrigins:
     return:
       result -- (bool) Pokemon level up
     """
-    if self.selectMainPokemon(pokemon_id=pokemon_id, upgrade_pokemon=False):
-      res, active_pokemon, inactive_pokemons, is_level_100, can_level_up = self.getOwnedPokemons()
+    if self.selectMainPokemon(pokemon_id=pokemon_id):
+      res, active_pokemon, inactive_pokemons, is_level_100, can_level_up = self.getOwnedPokemons(auto_level_up=False)
       if res:
         if can_level_up:
           if is_level_100:
@@ -1280,7 +1276,7 @@ class PokemonOrigins:
 
     for attack_id in attack_ids:
       if attack_id in all_attack_ids:
-        current_attack_value = all_attacks[attack_id]['power'] * all_attacks[attack_id]['precision']
+        current_attack_value = all_attacks[attack_id]['power'] + 0.5 * all_attacks[attack_id]['precision']
         if current_attack_value > best_attack_value:
           best_attack_value = current_attack_value
           best_attack = attack_id
@@ -1348,13 +1344,17 @@ class PokemonOrigins:
       logging.warning("Could not run away from battle")
     return success
 
-  def useItemInBattle(self, id_item):
+  def useItemInBattle(self, id_item, is_quest=False):
     """Use specific item in battle
 
     Keyword arguments:
       id_item -- (int) Id of the item to use
+      is_quest -- (bool, optional) Is it a quest battle? By default it is not
     """
-    fight_url = "{}/combat.php".format(PokemonOrigins.__BASE_WEBSITE)
+    if is_quest:
+      fight_url = "{}/quetes_combat.php".format(PokemonOrigins.__BASE_WEBSITE)
+    else:
+      fight_url = "{}/combat.php".format(PokemonOrigins.__BASE_WEBSITE)
     payload = {
                "id_item": id_item,
                "action": "objet"
@@ -1418,13 +1418,18 @@ class PokemonOrigins:
     # Pokemon not catched (and no error)
     return True, False
 
-  def changePokemonInBattle(self, id_pokemon):
+  def changePokemonInBattle(self, id_pokemon, is_quest=False):
     """Change the curent pokemon of the battle
 
     Keyword arguments:
       id_pokemon -- ([]) Id of the new pokemon to use
+      is_quest -- (bool, optional) Is it a quest battle? By default it is not
     """
-    fight_url = "{}/combat.php".format(PokemonOrigins.__BASE_WEBSITE)
+    if is_quest:
+      fight_url = "{}/quetes_combat.php".format(PokemonOrigins.__BASE_WEBSITE)
+    else:
+      fight_url = "{}/combat.php".format(PokemonOrigins.__BASE_WEBSITE)
+
     payload = {
                "pokemon": id_pokemon,
                "action": "changer_pokemon"
@@ -1433,11 +1438,12 @@ class PokemonOrigins:
     self.session.post(url=fight_url, data=payload)
     time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
-  def attackInBattle(self, id_attack):
+  def attackInBattle(self, id_attack, is_quest=False):
     """Attack the current pokemon with a specific attack
 
     Keyword arguments:
       id_attack -- (int) Attack to use
+      is_quest -- (bool, optional) Is it a quest battle? By default it is not
 
     return:
       no_error -- (bool) No error during the function
@@ -1448,7 +1454,11 @@ class PokemonOrigins:
       ennemy_went_away -- (bool) The ennemy pokemon went away (battle is finished)
       you_are_dead -- (bool) Your current pokemon is dead
     """
-    attack_url = "{}/combat.php".format(PokemonOrigins.__BASE_WEBSITE)
+    if is_quest:
+      attack_url = "{}/quetes_combat.php".format(PokemonOrigins.__BASE_WEBSITE)
+    else:
+      attack_url = "{}/combat.php".format(PokemonOrigins.__BASE_WEBSITE)
+
     payload = {
                "attaque": id_attack,
                "action": "attaque"
@@ -1461,14 +1471,30 @@ class PokemonOrigins:
       logging.warning("An error occured during the attack, the pokemon is not here anymore")
       return False, False, False, True, False
 
+    ennemy_is_dead = ("Vous avez gagné!" in post_attack) or ("Vous avez vaincu" in post_attack)
     ennemy_went_away = ("Le pokémon prend la fuite" in post_attack)
-    ennemy_is_dead = ("Vous avez gagné!" in post_attack)
     you_are_dead = ("Votre pokémon est K.O." in post_attack)
 
-    if not "l'attaque a échoué." in BeautifulSoup(post_attack, "html.parser").find("div", id="description_combat").find("div").text:
-      attack_success = True
+    soup_post_attack = BeautifulSoup(post_attack, "html.parser")
+    if soup_post_attack.find("div", id="description_combat"):
+      if soup_post_attack.find("div", id="description_combat").find("div"):
+        if not "l'attaque a échoué." in soup_post_attack.find("div", id="description_combat").find("div").text:
+          attack_success = True
+        else:
+          attack_success = False
+      else:
+        attack_success = True
     else:
-      attack_success = False
+      attack_success = True
+
+    # If ennemy is dead, check if we can continue the fight (if more than one pokemon)
+    if "Vous avez vaincu" in post_attack:
+        logging.debug("Continue fight with the next pokemon")
+        payload = {
+                    "entree": "on",
+                    "action": "pokemon_suivant"
+                  }
+        self.session.post(url=attack_url, data=payload).text
 
     logging.debug("Attack success: {}".format(str(attack_success)))
     logging.debug("Ennemy is dead: {}".format(str(ennemy_is_dead)))
@@ -1476,8 +1502,11 @@ class PokemonOrigins:
     logging.debug("Your pokemon is dead: {}".format(str(you_are_dead)))
     return True, attack_success, ennemy_is_dead, ennemy_went_away, you_are_dead
 
-  def getBattleInformations(self):
+  def getBattleInformations(self, is_quest=False):
     """Get important informations from the battle
+
+    Keyword arguments:
+      is_quest -- (bool, optional) Is it a quest battle? By default it is not
 
     return:
       still_in_battle -- (bool) There is still a battle taking place
@@ -1487,7 +1516,10 @@ class PokemonOrigins:
       current_life -- (int) Current life of current pokemon (in %)
       ennemy_life -- (int) Life of ennemy pokemon (in %)
     """
-    attack_url = "{}/combat.php".format(PokemonOrigins.__BASE_WEBSITE)
+    if is_quest:
+      attack_url = "{}/quetes_combat.php".format(PokemonOrigins.__BASE_WEBSITE)
+    else:
+      attack_url = "{}/combat.php".format(PokemonOrigins.__BASE_WEBSITE)
     get_attack = self.session.get(url=attack_url).text
     time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
@@ -1497,7 +1529,7 @@ class PokemonOrigins:
     current_life = -1
     ennemy_life = -1
 
-    still_in_battle = not ("Le pokémon n'est plus là" in get_attack)
+    still_in_battle = (not "Le pokémon n'est plus là" in get_attack) and (not "Vous avez abandonné" in get_attack)
     if not still_in_battle:
       logging.debug("There is no fight")
       return False, attacks, items, other_pokemons, current_life, ennemy_life
@@ -1541,7 +1573,7 @@ class PokemonOrigins:
     logging.debug("Ennemy life: {}%".format(str(ennemy_life)))
     return True, attacks, items, other_pokemons, current_life, ennemy_life
 
-  def fightAllPokemonsInBattle(self, request_catch=False):
+  def fightAllPokemonsInBattle(self, request_catch=False, is_quest=False):
     """Fight all pokemons of the battle or catch the pokemon
 
     The algorithm will try to kill/catch pokemons in an optimized way even if it is not perfect.
@@ -1550,12 +1582,14 @@ class PokemonOrigins:
 
     Keyword arguments:
       request_catch -- (bool, optional) Catch the pokemon (by default, it's not trying to catch it)
+      is_quest -- (bool, optional) Is it a quest battle? By default it is not
 
     return:
       fight_won -- (bool) The fight was won (if pokemon catched, the fight is considered as won)
       pokemon_catched -- (bool) Pokemon catched (will always be false if catching pokemon was not requested)
     """
-    still_in_battle, attacks, items, other_pokemons, current_life, ennemy_life = self.getBattleInformations()
+    already_used_pokemons = []
+    still_in_battle, attacks, items, other_pokemons, current_life, ennemy_life = self.getBattleInformations(is_quest=is_quest)
 
     while still_in_battle:
       # Try to catch pokemon if it is low and it is requested
@@ -1568,9 +1602,9 @@ class PokemonOrigins:
           request_catch = False
 
       # Attack the pokemon
-      no_error, attack_success, ennemy_is_dead, ennemy_went_away, you_are_dead = self.attackInBattle(self.getBestAttack(attacks))
+      no_error, attack_success, ennemy_is_dead, ennemy_went_away, you_are_dead = self.attackInBattle(self.getBestAttack(attacks), is_quest=is_quest)
       # Update all data
-      still_in_battle, attacks, items, other_pokemons, current_life, ennemy_life = self.getBattleInformations()
+      still_in_battle, attacks, items, other_pokemons, current_life, ennemy_life = self.getBattleInformations(is_quest=is_quest)
       if not no_error:
         logging.warning("An error occured during attack, aborting...")
         return False, False
@@ -1580,38 +1614,42 @@ class PokemonOrigins:
 
       # Change pokemon if low chance to win or dead
       if (current_life <= 20 and ennemy_life > current_life) or you_are_dead:
-        if len(other_pokemons) > 0:
-          self.changePokemonInBattle(other_pokemons[0])
+        if len(other_pokemons) > 0 and len(already_used_pokemons) < len(other_pokemons):
+          res, active, not_actives, is_level_100, can_level_up = self.getOwnedPokemons()
+          if res:
+            already_used_pokemons.append(active['id'])
+          other_pokemons = [x for x in other_pokemons if x not in already_used_pokemons]
+          self.changePokemonInBattle(other_pokemons[0], is_quest=is_quest)
         else:
           logging.warning("All our pokemons are low life or dead, running away from the fight")
           self.runAwayFromBattle()
           return False, False
-      elif current_life < 50:
+      elif current_life < 35:
         # Try to use a potion if the pokemon is low life but not that much
         potion_used = False
         item_ids = items.keys()
         if PokemonOrigins.eItemIds.POTION in items.keys():
           if items[PokemonOrigins.eItemIds.POTION] > 0:
-            self.useItemInBattle(PokemonOrigins.eItemIds.POTION)
+            self.useItemInBattle(PokemonOrigins.eItemIds.POTION, is_quest=is_quest)
             potion_used = True
         if (not potion_used) and PokemonOrigins.eItemIds.SUPER_POTION in items.keys():
           if items[PokemonOrigins.eItemIds.SUPER_POTION] > 0:
-            self.useItemInBattle(PokemonOrigins.eItemIds.SUPER_POTION)
+            self.useItemInBattle(PokemonOrigins.eItemIds.SUPER_POTION, is_quest=is_quest)
             potion_used = True
         if (not potion_used) and PokemonOrigins.eItemIds.HYPER_POTION in items.keys():
           if items[PokemonOrigins.eItemIds.HYPER_POTION] > 0:
-            self.useItemInBattle(PokemonOrigins.eItemIds.HYPER_POTION)
+            self.useItemInBattle(PokemonOrigins.eItemIds.HYPER_POTION, is_quest=is_quest)
             potion_used = True
         if (not potion_used) and PokemonOrigins.eItemIds.MAX_POTION in items.keys():
           if items[PokemonOrigins.eItemIds.MAX_POTION] > 0:
-            self.useItemInBattle(PokemonOrigins.eItemIds.MAX_POTION)
+            self.useItemInBattle(PokemonOrigins.eItemIds.MAX_POTION, is_quest=is_quest)
             potion_used = True
 
         if not potion_used:
           logging.warning("No available potion to heal the pokemon")
 
       # Update all data
-      still_in_battle, attacks, items, other_pokemons, current_life, ennemy_life = self.getBattleInformations()
+      still_in_battle, attacks, items, other_pokemons, current_life, ennemy_life = self.getBattleInformations(is_quest=is_quest)
 
     logging.debug("Battle won!")
     return True, False
@@ -1688,6 +1726,215 @@ class PokemonOrigins:
       return False, 0, 0
 
     return True, number_of_won_fights, number_of_catched_pokemons
+
+######################### Quest ##########################
+
+  def doSpeakQuest(self, id, x=-1, y=-1, is_principal_quest=True):
+    """Do quest which requires to speak
+
+    Keyword arguments:
+      id -- (int) ID of the quest
+      x -- (int, optional) Horizontal position of the quest
+      y -- (int, optional) Vertical position of the quest
+      is_principal_quest -- (bool, optional) Is it a principal or secondary quest? (default: principal)
+
+    return:
+      success -- (bool) The quest is a success
+    """
+    if x != -1 and y != -1:
+      if not self.goToInMap(x, y):
+        logging.warning("Impossible to go to quest localisation ({}, {})".format(str(x), str(y)))
+        return False
+
+    if is_principal_quest:
+      quest_url = "{}/quetes_principales.php".format(PokemonOrigins.__BASE_WEBSITE)
+    else:
+      quest_url  = "{}/quetes_secondaires.php".format(PokemonOrigins.__BASE_WEBSITE)
+    payload = {
+               "action": "parler"
+              }
+    params = {
+               "id": id
+             }
+    post_quest = self.session.post(url=quest_url, data=payload, params=params).text
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+    return (not "Vous n'avez pas accès à ces informations" in post_quest) and (not "c'est mal de tricher avec les liens" in post_quest)
+
+  def doFightQuest(self, id, x=-1, y=-1):
+    """Do quest which requires to fight
+
+    Keyword arguments:
+      id -- (int) ID of the quest
+      x -- (int, optional) Horizontal position of the quest
+      y -- (int, optional) Vertical position of the quest
+
+    return:
+      success -- (bool) The quest is a success
+    """
+    # Go to quest localisation
+    if x != -1 and y != -1:
+      if not self.goToInMap(x, y):
+        logging.warning("Impossible to go to quest localisation ({}, {})".format(str(x), str(y)))
+        return False
+
+    # Get data to request the fight
+    quest_url = "{}/quetes_principales.php".format(PokemonOrigins.__BASE_WEBSITE)
+    params = {"id": id}
+    quest_data = BeautifulSoup(self.session.get(url=quest_url, params=params).text, "html.parser")
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+    id_quete = ""
+    entree = ""
+    type_quete = ""
+    action = ""
+    for form in quest_data.findAll("form"):
+      if form.find('input', {'name': 'action'}):
+        if form.find('input', {'name': 'action'}).get("value") == "combat":
+          id_quete = form.find('input', {'name': 'id_quete'}).get("value")
+          entree = form.find('input', {'name': 'entree'}).get("value")
+          type_quete = form.find('input', {'name': 'type_quete'}).get("value")
+          action = form.find('input', {'name': 'action'}).get("value")
+          break
+    if len(id_quete) == 0 or len(entree) == 0 or len(type_quete) == 0 or len(action) == 0:
+      logging.warning("Impossible to get all informations in order to request the fight")
+      return False
+
+    # Request the fight
+    fight_quest_url = "{}/quetes_combat.php".format(PokemonOrigins.__BASE_WEBSITE)
+    payload = {
+                "action": action,
+                "id_quete": id_quete,
+                "type_quete": type_quete,
+                "entree": entree
+              }
+    res_request_fight = self.session.post(url=fight_quest_url, data=payload).text
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+    if not ("à combattre à votre adversaire." in res_request_fight):
+      logging.warning("Error while requesting the fight")
+      return False
+
+    # Fight
+    fight_won, pokemon_catched = self.fightAllPokemonsInBattle(request_catch=False, is_quest=True)
+
+    return fight_won
+
+  def speakToPnj(self, id, x=-1, y=-1):
+    """Speak with a pnj
+
+    Keyword arguments:
+      id -- (int) ID of the pnj
+      x -- (int, optional) Horizontal position of the quest
+      y -- (int, optional) Vertical position of the quest
+
+    return:
+      success -- (bool) Speaking with the pnj is a success
+    """
+    # Go to quest localisation
+    if x != -1 and y != -1:
+      if not self.goToInMap(x, y):
+        logging.warning("Impossible to go to pnj localisation ({}, {})".format(str(x), str(y)))
+        return False
+
+    # Get data to request the fight
+    quest_url = "{}/pnj.php".format(PokemonOrigins.__BASE_WEBSITE)
+    params = {"id": id}
+    pnj_data = self.session.get(url=quest_url, params=params).text
+    time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
+
+    return not ("Il est interdit" in pnj_data)
+
+  def doPrincipalQuest(self, quest_id, permissive=False):
+    """Automatically try to achieve the quest
+
+    Keyword arguments:
+      quest_id -- (int) ID of the principal quest
+      permissive -- (int, optional) Try all elements of the quest even if one fails
+
+    return:
+      success -- (bool) Quest success
+    """
+    # Quest 1
+    if quest_id == 1:
+      if not self.doSpeakQuest(id=1, x=97, y=20):
+        logging.warning("Could not do speak quest 1 for principal quest 1...")
+        if not permissive:
+          return False
+      # Try to catch 3 pokemons in order to be more prepared for fight with chen later
+      no_error, number_of_won_fights, number_of_catched_pokemons = self.fightAnyWildPokemonInAreaWithAnyPokemon(x1=94, y1=19, x2=94, y2=21, number_of_requested_win_or_catch=3, request_catch=True)
+      if not (no_error and number_of_catched_pokemons >= 1):
+        logging.warning("Could not capture a pokemon for the principal quest 1...")
+        if not permissive:
+          return False
+      if not self.doSpeakQuest(id=2, x=97, y=20):
+        logging.warning("Could not do speak quest 2 (1/2) for principal quest 1...")
+        if not permissive:
+          return False
+      if not self.speakToPnj(id=1, x=96, y=23):
+        logging.warning("Could not speak to pnj 1 for principal quest 1...")
+        if not permissive:
+          return False
+      if not self.doSpeakQuest(id=2, x=96, y=23):
+        logging.warning("Could not do speak quest 2 (2/2) for principal quest 1...")
+        if not permissive:
+          return False
+      if not self.doSpeakQuest(id=3, x=97, y=20):
+        logging.warning("Could not do speak quest 3 for principal quest 1...")
+        if not permissive:
+          return False
+      no_error, number_of_won_fights, number_of_catched_pokemons = self.fightAnyWildPokemonInAreaWithAnyPokemon(x1=94, y1=19, x2=94, y2=21, number_of_requested_win_or_catch=3)
+      if not (no_error and number_of_won_fights >= 3):
+        logging.warning("Could not kill 3 pokemons for the principal quest 1...")
+        if not permissive:
+          return False
+      if not self.doFightQuest(id=4, x=97, y=20):
+        logging.warning("Could not do win fight quest 1 for principal quest 1...")
+        return False
+      else:
+        logging.debug("Principal quest 1 success!")
+        return True
+    # Quest 2
+    elif quest_id == 2:
+      if not self.doSpeakQuest(id=5, x=97, y=20):
+        logging.warning("Could not do speak quest 5 for principal quest 2...")
+        return False
+      if not self.speakToPnj(id=2, x=68, y=22):
+        logging.warning("Could not do speak pnj 2 for principal quest 2...")
+        if not permissive:
+          return False
+      if not self.doSpeakQuest(id=5):
+        logging.warning("Could not do speak quest 5 for principal quest 2...")
+        if not permissive:
+          return False
+      if not self.doSpeakQuest(id=6):
+        logging.warning("Could not do speak quest 6 (1/2) for principal quest 2...")
+        if not permissive:
+          return False
+      if not self.speakToPnj(id=3, x=78, y=22):
+        logging.warning("Could not do speak pnj 2 for principal quest 2...")
+        if not permissive:
+          return False
+      if not self.doSpeakQuest(id=6):
+        logging.warning("Could not do speak quest 6 (2/2) for principal quest 2...")
+        if not permissive:
+          return False
+      if not self.doSpeakQuest(id=7, x=68, y=22):
+        logging.warning("Could not do speak quest 7 (1/2) for principal quest 2...")
+        if not permissive:
+          return False
+      if not self.speakToPnj(id=4, x=97, y=20):
+        logging.warning("Could not do speak pnj 4 for principal quest 2...")
+        if not permissive:
+          return False
+      if not self.doSpeakQuest(id=7):
+        logging.warning("Could not do speak quest 7 (2/2) for principal quest 2...")
+        return False
+      else:
+        logging.debug("Principal quest 2 success!")
+        return True
+    # Unhandled quests
+    else:
+      logging.warning("Principal quest {} is not handled yet...".format(str(quest_id)))
+      return False
 
 if __name__ == "__main__":
   """Demo on how to connect and do actions to the website"""
