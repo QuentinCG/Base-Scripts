@@ -1577,8 +1577,13 @@ if __name__ == "__main__":
   # Get the login and the password from command line
   arg_login = ""
   arg_password = ""
+  arg_do_bonus = False
+  arg_evolve_all_pokemons = False
+  arg_level_up_all_pokemons = False
+  arg_demo_fight = False
+  arg_do_all_missions = False
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "u:p:", ["username=", "password="])
+    opts, args = getopt.getopt(sys.argv[1:], "u:p:belfm", ["username=", "password=", "bonus", "evolve", "levelup", "fight", "missions"])
   except getopt.GetoptError as err:
     print("[ERROR] "+str(err))
     sys.exit(1)
@@ -1587,6 +1592,16 @@ if __name__ == "__main__":
       arg_login = str(a)
     elif o in ("-p", "--password"):
       arg_password = str(a)
+    elif o in ("-b", "--bonus"):
+      arg_do_bonus = True
+    elif o in ("-e", "--evolve"):
+      arg_evolve_all_pokemons = True
+    elif o in ("-l", "--levelup"):
+      arg_level_up_all_pokemons = True
+    elif o in ("-f", "--fight"):
+      arg_demo_fight = True
+    elif o in ("-m", "--missions"):
+      arg_do_all_missions = True
     else:
       print("[ERROR] Not handled parameters (only username (-u) and password (-p) available.")
   if arg_login == "" or arg_password == "":
@@ -1599,13 +1614,19 @@ if __name__ == "__main__":
   # Connect
   if (pkm_orig.connect(login=arg_login, password=arg_password)):
     # Do some actions in the website
-    pkm_orig.doAllBonus()
-    #pkm_orig.levelUpAllPokemons()
-    pkm_orig.evolveAllPokemons()
-    pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=28, y1=-10, x2=29, y2=-7, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=60)
-    pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=28, y1=-4, x2=29, y2=-3, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=60)
-    pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=26, y1=2, x2=27, y2=-3, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=60)
-    pkm_orig.doAllMissions()
+    if arg_do_bonus:
+      pkm_orig.doAllBonus()
+    if arg_evolve_all_pokemons:
+      pkm_orig.evolveAllPokemons()
+    if arg_demo_fight:
+      pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=28, y1=-10, x2=29, y2=-7, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=60)
+      pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=28, y1=-4, x2=29, y2=-3, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=60)
+      pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=26, y1=2, x2=27, y2=-3, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=60)
+    if arg_level_up_all_pokemons:
+      pkm_orig.levelUpAllPokemons()
+    if arg_do_all_missions:
+      pkm_orig.doAllMissions()
+
     pkm_orig.disconnect()
 
     # Quit the program without error
