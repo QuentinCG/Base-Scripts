@@ -111,7 +111,7 @@ class PokemonOrigins:
 
     result = ("Vous êtes maintenant connecté." in post_login.text)
     if result:
-      logging.debug("Connected to {}".format(login))
+      logging.info("Connected to {}".format(login))
     else:
       logging.warning("Could not connect to {}".format(login))
 
@@ -129,7 +129,7 @@ class PokemonOrigins:
 
     result = ("Votre session a bien été arretée!" in disconnection_status.text)
     if result:
-      logging.debug("Disconnected")
+      logging.info("Disconnected")
     else:
       logging.warning("Could not disconnect")
 
@@ -153,7 +153,7 @@ class PokemonOrigins:
         # Then get the bonus
         self.session.get("{}/{}".format(PokemonOrigins.__BASE_WEBSITE, bonus_uri))
         time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
-        logging.debug("Bonus {} done.".format(bonus_uri))
+        logging.info("Bonus {} done.".format(bonus_uri))
       else:
         logging.warning("No bonus possible for {} (already done)".format(bonus_uri))
         time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
@@ -250,6 +250,8 @@ class PokemonOrigins:
       # Just wait before some missions becomes available
       if len(missions) <= 0 and len(pokemons) > 0:
         time.sleep(60)
+
+    logging.info("All missions done")
 
 ########################### Map ############################
 
@@ -722,7 +724,7 @@ class PokemonOrigins:
             evolve_result = self.session.post(url=pokemons_url, data=payload).text
             time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
             if "a bien évolué" in evolve_result:
-              logging.debug("Pokemon {} evolved".format(pokemon))
+              logging.info("Pokemon {} evolved".format(pokemon))
             else:
               logging.warning("Pokemon {} did not evolve".format(pokemon))
               all_evolved_properly = False
@@ -1384,19 +1386,23 @@ class PokemonOrigins:
     item_ids = items.keys()
     if PokemonOrigins.eItemIds.POKEBALL in item_ids:
       if items[PokemonOrigins.eItemIds.POKEBALL] > 0:
+        logging.info("Using one pokeball to try to catch a pokemon")
         id_pokeball = PokemonOrigins.eItemIds.POKEBALL
     elif PokemonOrigins.eItemIds.SUPERBALL in item_ids:
       if items[PokemonOrigins.eItemIds.SUPERBALL] > 0:
+        logging.info("Using one superball to try to catch a pokemon")
         id_pokeball = PokemonOrigins.eItemIds.SUPERBALL
     elif PokemonOrigins.eItemIds.HYPERBALL in item_ids:
       if items[PokemonOrigins.eItemIds.HYPERBALL] > 0:
+        logging.info("Using one hyperball to try to catch a pokemon")
         id_pokeball = PokemonOrigins.eItemIds.HYPERBALL
     elif PokemonOrigins.eItemIds.MASTERBALL in item_ids:
       if items[PokemonOrigins.eItemIds.MASTERBALL] > 0:
+        logging.info("Using one masterball to catch a pokemon")
         id_pokeball = PokemonOrigins.eItemIds.MASTERBALL
 
     if id_pokeball == -1:
-      logging.debug("No pokeballs availaible in order to catch a pokemon")
+      logging.warning("No pokeballs availaible in order to catch a pokemon")
       return True, False
 
     catch_url = "{}/combat.php".format(PokemonOrigins.__BASE_WEBSITE)
@@ -1409,7 +1415,7 @@ class PokemonOrigins:
     time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
     if "Félicitations! Vous avez capturé" in post_catch:
-      logging.debug("Pokemon catched")
+      logging.info("Pokemon catched")
       return True, True
     elif not "Quel dommage! Il parvient à sortir de là!" in post_catch:
       logging.warning("An error occured during the catch of the pokemon")
@@ -1601,7 +1607,7 @@ class PokemonOrigins:
       # Try to catch pokemon if it is low and it is requested
       if request_catch and ennemy_life < 30:
         if self.catchPokemonInBattle(items):
-          logging.info("Pokemon catched!")
+          logging.debug("Pokemon catched!")
           return True, True
         else:
           logging.warning("Could not catch the pokemon, let's try to kill it")
@@ -1645,18 +1651,22 @@ class PokemonOrigins:
         if PokemonOrigins.eItemIds.POTION in items.keys():
           if items[PokemonOrigins.eItemIds.POTION] > 0:
             self.useItemInBattle(PokemonOrigins.eItemIds.POTION, is_quest=is_quest)
+            logging.info("Using one potion in fight")
             potion_used = True
         if (not potion_used) and PokemonOrigins.eItemIds.SUPER_POTION in items.keys():
           if items[PokemonOrigins.eItemIds.SUPER_POTION] > 0:
             self.useItemInBattle(PokemonOrigins.eItemIds.SUPER_POTION, is_quest=is_quest)
+            logging.info("Using one super potion in fight")
             potion_used = True
         if (not potion_used) and PokemonOrigins.eItemIds.HYPER_POTION in items.keys():
           if items[PokemonOrigins.eItemIds.HYPER_POTION] > 0:
             self.useItemInBattle(PokemonOrigins.eItemIds.HYPER_POTION, is_quest=is_quest)
+            logging.info("Using one hyper potion in fight")
             potion_used = True
         if (not potion_used) and PokemonOrigins.eItemIds.MAX_POTION in items.keys():
           if items[PokemonOrigins.eItemIds.MAX_POTION] > 0:
             self.useItemInBattle(PokemonOrigins.eItemIds.MAX_POTION, is_quest=is_quest)
+            logging.info("Using one max potion in fight")
             potion_used = True
 
         if not potion_used:
