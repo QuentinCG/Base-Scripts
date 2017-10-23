@@ -470,8 +470,9 @@ class PokemonOrigins:
 
             if found_action_points and found_pokemon_level:
               inactive_pokemons.append(dict_pokemon)
-      else:
-        return False, active_pokemon, inactive_pokemons, is_level_100, can_level_up
+    else:
+      logging.warning("Impossible to get the inactive pokemon table")
+      return False, active_pokemon, inactive_pokemons, is_level_100, can_level_up
 
     # Get info to know if current pokemon is level 100
     if "px;\"> lvl 100" in response.text:
@@ -2042,31 +2043,30 @@ if __name__ == "__main__":
 
   # Connect
   if (pkm_orig.connect(login=arg_login, password=arg_password)):
-    print("Connected to {}".format(arg_login))
     # Do some actions in the website
     if arg_do_bonus:
       pkm_orig.doAllBonus()
-      print("All bonus done")
+      logging.info("All bonus done")
     if arg_evolve_all_pokemons:
-      print("All pokemon evolved: {}".format(str(pkm_orig.evolveAllPokemons())))
+      logging.info("All pokemon evolved: {}".format(str(pkm_orig.evolveAllPokemons())))
     if arg_demo_fight:
-      print("----- Fighting demo begin -----")
+      logging.info("----- Fighting demo begin -----")
       # Go to pokemon league by foot or with dracoport
       if not pkm_orig.goToInMap(x=28, y=-10):
-        print("Need to use the dracoport to go to the pokemon league...")
+        logging.warning("Going to the pokemon league by dracoport...")
         pkm_orig.useDracoport(PokemonOrigins.eDracoportLocalization.POKEMON_LEAGUE)
       else:
-        print("Going to the pokemon league by foot")
+        logging.info("Going to the pokemon league by foot")
 
       # Pokemon league
       if pkm_orig.goToInMap(x=28, y=-10):
-        print("Fighting pokemons in the pokemon league area")
+        logging.info("Fighting pokemons in the pokemon league area")
         pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=28, y1=-10, x2=29, y2=-7, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=50)
         pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=28, y1=-4, x2=29, y2=-3, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=50)
         pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=26, y1=2, x2=27, y2=-3, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=50)
         # Going into cave near pokemon league
         if pkm_orig.goToInMap(x=30, y=-5):
-          print("Fighting pokemons in the pokemon cave area")
+          logging.info("Fighting pokemons in the pokemon cave area")
           pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=30, y1=-5, x2=30, y2=-5, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=50)
           pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=31, y1=-9, x2=31, y2=2, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=50)
           pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=32, y1=-9, x2=32, y2=2, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=50)
@@ -2074,49 +2074,45 @@ if __name__ == "__main__":
           pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=34, y1=-9, x2=34, y2=2, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=50)
           pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=35, y1=-9, x2=35, y2=2, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=50)
           if pkm_orig.goToInMap(x=36, y=-4):
-            print("Fighting pokemons in the pokemon victory road area")
+            logging.info("Fighting pokemons in the pokemon victory road area")
             pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=36, y1=-4, x2=36, y2=-4, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=40)
             pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=40, y1=-8, x2=41, y2=3, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=35)
             pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=43, y1=-8, x2=44, y2=3, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=30)
             pkm_orig.fightAnyWildPokemonInAreaWithAnyPokemon(x1=46, y1=-8, x2=47, y2=3, request_catch=True, number_of_requested_win_or_catch=-1, level_requirement=30)
             # Go back to first place
-            print("Trying to go back to the pokemon league by foot")
+            logging.info("Trying to go back to the pokemon league by foot")
             if pkm_orig.goToInMap(x=41, y=-4):
               if pkm_orig.goToInMap(x=35, y=-4):
                 if pkm_orig.goToInMap(x=30, y=-5):
                   if pkm_orig.goToInMap(x=28, y=-10):
-                    print("All fight demo done with success")
+                    logging.info("All fight demo done with success")
                   else:
-                    print("Impossible to go back to (28, -10)")
+                    logging.warning("Impossible to go back to (28, -10)")
                 else:
-                  print("Impossible to go back to (30, -5)")
+                  logging.warning("Impossible to go back to (30, -5)")
               else:
-                print("Impossible to go back to (35, -4)")
+                logging.warning("Impossible to go back to (35, -4)")
             else:
-              print("Impossible to go back to (41, -4)")
+              logging.warning("Impossible to go back to (41, -4)")
 
         if not pkm_orig.goToInMap(x=28, y=-10):
           if pkm_orig.useDracoport(PokemonOrigins.eDracoportLocalization.POKEMON_LEAGUE):
-            print("Used dracoport to go back to pokemon league...")
+            logging.warning("Used dracoport to go back to pokemon league...")
           else:
-            print("Impossible to go back to pokemon league...")
+            logging.error("Impossible to go back to pokemon league...")
 
-      print("----- Fighting demo end -----")
+      logging.info("----- Fighting demo end -----")
 
     if arg_level_up_all_pokemons:
-      print("All pokemon leveled up: {}".format(str(pkm_orig.levelUpAllPokemons())))
+      logging.info("All pokemon leveled up: {}".format(str(pkm_orig.levelUpAllPokemons())))
     if arg_do_all_missions:
       pkm_orig.doAllMissions()
-      print("All missions done")
+      logging.info("All missions done")
 
-    if pkm_orig.disconnect():
-      print("Disconnected")
-    else:
-      print("Could not disconnect...")
+    pkm_orig.disconnect()
 
     # Quit the program without error
     sys.exit(0)
 
   # Could not connect...
-  print("Could not connect to {}...".format(arg_login))
   sys.exit(2)
