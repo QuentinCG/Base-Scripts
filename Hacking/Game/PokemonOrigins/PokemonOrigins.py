@@ -1601,7 +1601,7 @@ class PokemonOrigins:
       # Try to catch pokemon if it is low and it is requested
       if request_catch and ennemy_life < 30:
         if self.catchPokemonInBattle(items):
-          logging.debug("Pokemon catched!")
+          print("Pokemon catched!")
           return True, True
         else:
           logging.warning("Could not catch the pokemon, let's try to kill it")
@@ -1615,7 +1615,7 @@ class PokemonOrigins:
 
       # Check if battle is won
       if (not still_in_battle) and ennemy_is_dead:
-        logging.debug("Battle won!")
+        print("Battle won!")
         return True, False
 
       if not no_error:
