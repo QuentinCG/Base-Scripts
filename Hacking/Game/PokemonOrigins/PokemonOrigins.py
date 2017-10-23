@@ -404,7 +404,7 @@ class PokemonOrigins:
       time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
       success = "Vous êtes arrivé à destination!" in result.text
       if success:
-        logging.debug("You used the dracoport to go to place {}".format(str(dracoport_localization)))
+        logging.info("You used the dracoport to go to place {}".format(str(dracoport_localization)))
       else:
         logging.warning("Could not use the dracoport to go to place {} (x={}, y={}, price={})".format(str(dracoport_localization), str(x), str(y), str(price)))
     else:
@@ -603,7 +603,7 @@ class PokemonOrigins:
               # Level up again and again until it is fully upgraded
               while self.levelUpPokemon(pokemon_id):
                 logging.debug("Trying again to upgrade Pokemon {}".format(str(pokemon_id)))
-              logging.debug("Pokemon {} caracteristics upgraded".format(str(pokemon_id)))
+              logging.info("Pokemon {} caracteristics upgraded".format(str(pokemon_id)))
               return True
             else:
               logging.warning("Pokemon {} caracteristics not upgraded".format(str(pokemon_id)))
@@ -617,7 +617,7 @@ class PokemonOrigins:
             time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
             if ("Le pokémon gagn" in post_lvl_up.text):
-              logging.debug("Pokemon {} leveled up".format(str(pokemon_id)))
+              logging.info("Pokemon {} leveled up".format(str(pokemon_id)))
               return True
             else:
               logging.warning("Pokemon {} did not level up".format(str(pokemon_id)))
@@ -1601,7 +1601,7 @@ class PokemonOrigins:
       # Try to catch pokemon if it is low and it is requested
       if request_catch and ennemy_life < 30:
         if self.catchPokemonInBattle(items):
-          print("Pokemon catched!")
+          logging.info("Pokemon catched!")
           return True, True
         else:
           logging.warning("Could not catch the pokemon, let's try to kill it")
@@ -1615,7 +1615,7 @@ class PokemonOrigins:
 
       # Check if battle is won
       if (not still_in_battle) and ennemy_is_dead:
-        print("Battle won!")
+        logging.info("Battle won!")
         return True, False
 
       if not no_error:
@@ -1984,7 +1984,7 @@ if __name__ == "__main__":
 
   # Add Logs
   logger = logging.getLogger()
-  logger.setLevel(logging.WARNING)
+  logger.setLevel(logging.INFO)
 
   # Get the login and the password from command line
   arg_login = ""
