@@ -31,7 +31,7 @@ except NameError:
 class PokemonOrigins:
   """Class to do numerous actions on pokemon-origins.com automatically
   """
-  __WAIT_AFTER_REQUEST = 1 # Sec
+  __WAIT_AFTER_REQUEST = 0.5 # Sec
   __BASE_WEBSITE = "http://www.pokemon-origins.com"
 
   class eItemIds:
