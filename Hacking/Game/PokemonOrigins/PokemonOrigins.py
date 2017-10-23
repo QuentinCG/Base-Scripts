@@ -547,7 +547,7 @@ class PokemonOrigins:
     time.sleep(PokemonOrigins.__WAIT_AFTER_REQUEST)
 
     # Confirm change
-    res, active, not_actives, is_level_100, can_level_up = self.getOwnedPokemons()
+    res, active, not_actives, is_level_100, can_level_up = self.getOwnedPokemons(auto_level_up=False)
 
     if (active['id'] == pokemon_id):
       logging.debug("Active pokemon is now {}".format(str(pokemon_id)))
