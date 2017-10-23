@@ -1276,7 +1276,12 @@ class PokemonOrigins:
 
     for attack_id in attack_ids:
       if attack_id in all_attack_ids:
-        current_attack_value = all_attacks[attack_id]['power'] + 0.5 * all_attacks[attack_id]['precision']
+        # Get an approximate idea of the power of the attack
+        if all_attacks[attack_id]['power'] > 0:
+          current_attack_value = all_attacks[attack_id]['power'] + 0.3 * all_attacks[attack_id]['precision']
+        else:
+          current_attack_value = 0
+        # Keep only the best attack
         if current_attack_value > best_attack_value:
           best_attack_value = current_attack_value
           best_attack = attack_id
@@ -1589,6 +1594,7 @@ class PokemonOrigins:
       pokemon_catched -- (bool) Pokemon catched (will always be false if catching pokemon was not requested)
     """
     already_used_pokemons = []
+    number_attacks_done_by_pokemon = 0 # Used in order to change pokemon if there is a dead lock in fight (both pokemons that can't kill the other)
     still_in_battle, attacks, items, other_pokemons, current_life, ennemy_life = self.getBattleInformations(is_quest=is_quest)
 
     while still_in_battle:
@@ -1603,6 +1609,7 @@ class PokemonOrigins:
 
       # Attack the pokemon
       no_error, attack_success, ennemy_is_dead, ennemy_went_away, you_are_dead = self.attackInBattle(self.getBestAttack(attacks), is_quest=is_quest)
+      number_attacks_done_by_pokemon = number_attacks_done_by_pokemon + 1
       # Update all data
       still_in_battle, attacks, items, other_pokemons, current_life, ennemy_life = self.getBattleInformations(is_quest=is_quest)
 
@@ -1619,13 +1626,14 @@ class PokemonOrigins:
         return False, False
 
       # Change pokemon if low chance to win or dead
-      if (current_life <= 20 and ennemy_life > current_life) or you_are_dead:
+      if (current_life <= 20 and ennemy_life > current_life) or you_are_dead or (number_attacks_done_by_pokemon > 15):
         if len(other_pokemons) > 0 and len(already_used_pokemons) < len(other_pokemons):
           res, active, not_actives, is_level_100, can_level_up = self.getOwnedPokemons()
           if res:
             already_used_pokemons.append(active['id'])
           other_pokemons = [x for x in other_pokemons if x not in already_used_pokemons]
           self.changePokemonInBattle(other_pokemons[0], is_quest=is_quest)
+          number_attacks_done_by_pokemon = 0
         else:
           logging.warning("All our pokemons are low life or dead, running away from the fight")
           self.runAwayFromBattle()
