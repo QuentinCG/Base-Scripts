@@ -1605,6 +1605,12 @@ class PokemonOrigins:
       no_error, attack_success, ennemy_is_dead, ennemy_went_away, you_are_dead = self.attackInBattle(self.getBestAttack(attacks), is_quest=is_quest)
       # Update all data
       still_in_battle, attacks, items, other_pokemons, current_life, ennemy_life = self.getBattleInformations(is_quest=is_quest)
+
+      # Check if battle is won
+      if (not still_in_battle) and ennemy_is_dead:
+        logging.debug("Battle won!")
+        return True, False
+
       if not no_error:
         logging.warning("An error occured during attack, aborting...")
         return False, False
