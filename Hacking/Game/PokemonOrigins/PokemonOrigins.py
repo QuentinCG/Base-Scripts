@@ -443,32 +443,35 @@ class PokemonOrigins:
         logging.debug("Found active pokemon: {}".format(str(active_pokemon['id'])))
 
     table_inactive = all_pokemons.find("table", id="table_pokemons_inactifs")
-    for pokemon in table_inactive.findAll("tr"):
-      if pokemon.find("a"):
-        link = pokemon.find("a")['href']
-        if "carte.php?pokemon_actif=" in link:
-          # Get the inactive pokemon ID
-          inactive_pokemon_id = int(link.replace("carte.php?pokemon_actif=", ""))
+    if table_inactive:
+      for pokemon in table_inactive.findAll("tr"):
+        if pokemon.find("a"):
+          link = pokemon.find("a")['href']
+          if "carte.php?pokemon_actif=" in link:
+            # Get the inactive pokemon ID
+            inactive_pokemon_id = int(link.replace("carte.php?pokemon_actif=", ""))
 
-          # Get the action points of the inactive pokemon
-          found_action_points = False
-          found_pokemon_level = False
-          dict_pokemon = {}
-          dict_pokemon['id'] = int(inactive_pokemon_id)
-          for tr in pokemon:
-            if tr.find("img"):
-              dict_pokemon['action_points'] = int(re.sub("[^0-9]", "", str(tr.text)))
-              found_action_points = True
-            if "lvl " in tr.text:
-              dict_pokemon['level'] = int(tr.text.replace("lvl ", ""))
-              found_pokemon_level = True
-          if not found_action_points:
+            # Get the action points of the inactive pokemon
+            found_action_points = False
+            found_pokemon_level = False
+            dict_pokemon = {}
+            dict_pokemon['id'] = int(inactive_pokemon_id)
+            for tr in pokemon:
+              if tr.find("img"):
+                dict_pokemon['action_points'] = int(re.sub("[^0-9]", "", str(tr.text)))
+                found_action_points = True
+              if "lvl " in tr.text:
+                dict_pokemon['level'] = int(tr.text.replace("lvl ", ""))
+                found_pokemon_level = True
+            if not found_action_points:
               logging.warning("Could not get the action points of pokemon {}".format(str(inactive_pokemon_id)))
-          if not found_pokemon_level:
+            if not found_pokemon_level:
               logging.warning("Could not get the level of pokemon {}".format(str(inactive_pokemon_id)))
 
-          if found_action_points and found_pokemon_level:
-            inactive_pokemons.append(dict_pokemon)
+            if found_action_points and found_pokemon_level:
+              inactive_pokemons.append(dict_pokemon)
+      else:
+        return False, active_pokemon, inactive_pokemons, is_level_100, can_level_up
 
     # Get info to know if current pokemon is level 100
     if "px;\"> lvl 100" in response.text:
@@ -1621,7 +1624,7 @@ class PokemonOrigins:
 
       # Check if battle is won
       if (not still_in_battle) and ennemy_is_dead:
-        logging.info("Battle won!")
+        logging.info("Battle won")
         return True, False
 
       if not no_error:
@@ -1675,7 +1678,7 @@ class PokemonOrigins:
       # Update all data
       still_in_battle, attacks, items, other_pokemons, current_life, ennemy_life = self.getBattleInformations(is_quest=is_quest)
 
-    logging.debug("Battle won!")
+    logging.debug("Battle won")
     return True, False
 
   def fightWildPokemon(self, wild_pokemon_id, x=-1, y=-1, request_catch=False):
