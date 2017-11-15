@@ -28,7 +28,7 @@ sudo certbot renew >> /var/log/letsencrypt/letsencrypt-renew.log 2>&1
 sudo service mosquitto restart >> /var/log/letsencrypt/letsencrypt-renew.log 2>&1
 sudo service proftpd restart >> /var/log/letsencrypt/letsencrypt-renew.log 2>&1
 date +'----------------- Lets Encrypt cron done at %d-%m-%y at %H:%M:%S -----------------' >> /var/log/letsencrypt/letsencrypt-renew.log" | sudo tee /etc/cron.weekly/letsencrypt-renew
-sudo chmod 755 /etc/cron.daily/letsencrypt-renew
+sudo chmod 755 /etc/cron.weekly/letsencrypt-renew
 
 # Deprecated way to install Let's Encrypt certificates:
 #echo "--------- Installing Let's Encrypt dependencies ----------"
