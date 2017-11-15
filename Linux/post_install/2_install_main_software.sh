@@ -15,7 +15,7 @@ echo "-------------- Install Text editors -------------"
 fastInstall vim gedit
 
 echo "-------------- Install anacron (cron) -------------"
-fastInstall vim gedit
+fastInstall anacron
 
 echo "------ Install basic file transfer (curl) -------"
 fastInstall curl
@@ -85,6 +85,8 @@ read -p 'Specify Git email address (quentin@comte-gaz.com): ' GIT_EMAIL
 read -p 'Specify Git name (Quentin Comte-Gaz): ' GIT_NAME
 git config --global user.email $GIT_EMAIL
 git config --global user.name $GIT_NAME
+git config --global http.sslverify false
+git config --global credential.helper store
 
 echo "---------------- FTP Management -----------------"
 fastInstall lftp filezilla ftp
