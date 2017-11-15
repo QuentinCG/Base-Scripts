@@ -89,6 +89,9 @@ echo "---------Enable PHPMyAdmin website and restart apache----------"
 echo "Enabling the new website"
 a2ensite phpmyadmin.conf
 
+echo "--------Enable Auth Digest--------------"
+a2enmod auth_digest
+
 echo "---------Set the default website redirection----------"
 
 echo "<! DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">
