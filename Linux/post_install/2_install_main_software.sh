@@ -14,6 +14,9 @@ source ../utils/functions.sh
 echo "-------------- Install Text editors -------------"
 fastInstall vim gedit
 
+echo "------------- Install spell checker --------------"
+fastInstall aspell-fr aspell-en
+
 echo "-------------- Install anacron (cron) -------------"
 fastInstall anacron
 
