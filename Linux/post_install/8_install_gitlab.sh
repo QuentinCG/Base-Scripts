@@ -92,3 +92,5 @@ echo "nginx['redirect_http_to_https_port'] = 1277"
 echo "nginx['ssl_certificate'] = '/etc/letsencrypt/live/xxxxxx/cert.pem'"
 echo "nginx['ssl_certificate_key'] = '/etc/letsencrypt/live/xxxxxx/privkey.pem'"
 echo "Also edit $GITLAB_FULL_PATH/index.php to use HTTPS instead of HTTP"
+echo "And then launch command 'gitlab-ctl reconfigure'"
+
