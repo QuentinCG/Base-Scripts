@@ -148,4 +148,16 @@ select yn in "Yes" "No"; do
   esac
 done
 
+echo "------------ Install Desktop applications -----------"
+echo "Is it a desktop computer?"
+select yn in "Yes" "No"; do
+  case $yn in
+    Yes ) fastInstall xpad vlc vlc-plugin-vlsub
+          install steam
+          break;;
+    No ) echo "No need to install desktop packages";
+         break;;
+  esac
+done
+
 echo "---------- End of the installation step ---------"
