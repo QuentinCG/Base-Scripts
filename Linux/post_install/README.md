@@ -1,7 +1,6 @@
-# What is it?
+# What is it
 
 Those scripts are aimed to install a fresh server with all important features in it.
-
 
 # How to launch them
 
