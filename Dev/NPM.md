@@ -54,12 +54,12 @@ You could also create a `package.json` file following this standard:
 ## Nodemon (restarts node app when file change detected)
 
 - Install: `npm install --save-dev nodemon`
-- Usage: `nodemon [node app here]`
+- <a target="_blank" href="https://github.com/remy/nodemon#usage">Usage</a>: `nodemon [node app here]`
 
 ## Axios (Do request to HTTP client/API)
 
 - Install: `npm install axios`
-- Usage:
+- <a target="_blank" href="https://github.com/axios/axios#example">Usage</a>:
 ```
 const httpRequest = require('axios');
  
@@ -77,3 +77,18 @@ httpRequest.get('/user?ID=12345')
     // always executed
   });
 ```
+
+## Mongoose (Communicate with a MongoDB database)
+
+- Install: `npm install mongoose`
+- <a target="_blank" href="https://mongoosejs.com/docs/index.html">Usage</a>:
+```
+const mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost:27017/test', {useNewUrlParser: true});
+
+const Cat = mongoose.model('Cat', { name: String });
+
+const kitty = new Cat({ name: 'Zildjian' });
+kitty.save().then(() => console.log('meow'));
+```
+- Additional information: Create a free 512MB MongoDB cluster from https://www.mongodb.com/ (Try Free -> Choose cluster -> Create a DB user with read/write access -> Whitelist all IP if in dev mode, else only your server IP -> Get link to connect to your app with pass of the DB user)
