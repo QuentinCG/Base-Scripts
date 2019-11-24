@@ -105,3 +105,12 @@ const kitty = new Cat({ name: 'Zildjian' });
 kitty.save().then(() => console.log('meow'));
 ```
 - Additional information: Create a free 512MB MongoDB cluster from https://www.mongodb.com/ (Try Free -> Choose cluster -> Create a DB user with read/write access -> Whitelist all IP if in dev mode, else only your server IP -> Get link to connect to your app with pass of the DB user)
+
+## Bootstrap (CSS framework)
+
+- Install: `npm install bootstrap` (and <a target="_blank" href="https://getbootstrap.com/docs/4.3/getting-started/webpack/">integrate it with webpack</a> if you use webpack)
+- <a target="_blank" href="https://getbootstrap.com/docs/4.3/components/">Usage</a>
+- Important:
+  - If using react, also install `react-bootstrap` package (<a target="_blank" href="https://react-bootstrap.github.io/getting-started/introduction/">more information here</a>)
+  - If using vuejs, also install `bootstrap-vue` package (<a target="_blank" href="https://bootstrap-vue.js.org/docs">more information here</a>)
+  - If using angular: TODO
