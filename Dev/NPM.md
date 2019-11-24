@@ -16,25 +16,32 @@ You could also create a `package.json` file following this standard:
   "name": "PROJECT_NAME_HERE",
   "version": "1.0.0",
   "description": "DESCRIPTION_HERE",
-  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/QuentinCG/REPO_HERE.git"
   },
-  "scripts": {
-    "ANYTHING_HERE": "CMD_TO_EXECUTE_HERE_WHEN 'npm run ANYTHING_HERE' IS_USED_FROM_CMD"
-  },
-  "author": "Quentin Comte-Gaz",
-  "license": "MIT",
-  "dependencies": {
-  },
-  "devDependencies": {
-    "nodemon": "*"
-  },
   "bugs": {
     "url": "https://github.com/QuentinCG/REPO_HERE/issues"
   },
-  "homepage": "https://github.com/QuentinCG/REPO_HERE"
+  "homepage": "https://github.com/QuentinCG/REPO_HERE",
+  "author": "Quentin Comte-Gaz",
+  "license": "MIT",
+  "main": "index.js",
+  "dependencies": {
+  },
+  "scripts": {
+    "start": "npm run dev",
+    "dev": "webpack --mode development --watch",
+    "prod": "webpack --mode production --watch",
+    "build": "webpack --mode production",
+    "ANYTHING_HERE": "CMD_TO_EXECUTE_HERE_WHEN 'npm run ANYTHING_HERE' IS_USED_FROM_CMD"
+  },
+  "devDependencies": {
+    "nodemon": "*",
+    "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.1",
+    "webpack-dev-server": "^3.7.2"
+  },
 }
 ```
 
@@ -55,6 +62,12 @@ You could also create a `package.json` file following this standard:
 
 - Install: `npm install --save-dev nodemon`
 - <a target="_blank" href="https://github.com/remy/nodemon#usage">Usage</a>: `nodemon [node app here]`
+
+## Webpack (Bundling and Packaging ressources and assets)
+
+- Install: `npm install --save-dev webpack webpack-cli webpack-dev-server` (+ <a target="_blank" href="https://webpack.js.org/configuration/">configure a `webpack.config.js` file manually or with `npx webpack-cli init` command</a>)
+- <a target="_blank" href="https://www.npmjs.com/package/webpack">Tools linked to webpack</a>; css-loader, sass, typescript, ...
+- <a target="_blank" href="https://webpack.js.org/guides/getting-started/">Getting started</a>
 
 ## Axios (Do request to HTTP client/API)
 
