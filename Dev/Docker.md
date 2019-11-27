@@ -64,7 +64,7 @@ Note: You can build in a not empty folder but you should ignore files you don't 
 |`WORKDIR [NEW PATH]`|Change work directory (all next command will be executed there)|
 |`EXPOSE [PORT NUMBER]`|Expose a port to the outside of the container|
 |`VOLUME [FOLDER IN THE CONTAINER]`|Expose a folder to the outside of the container|
-|`CMD [LIST OF COMMANDS (['CMD1', 'CMD2', ...])]`|Commands to execute when starting the container|
+|`CMD [command]`|Commands to execute when starting the container|
 
 ### Create and launch a new container
 
