@@ -78,3 +78,4 @@ More information can be found here: https://docs.docker.com/engine/reference/bui
 |`-p [local port]:[container port]`|Access the container port|`EXPOSE`|
 |`-d`|Launch the container in a deamon (background)||
 |`-it`|Launch the container in interactive mode in your command prompt)||
+|`--rm`|Remove the container once the container exit||
