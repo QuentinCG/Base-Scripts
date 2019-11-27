@@ -13,21 +13,29 @@ You can find a lot of base image in <a href="https://hub.docker.com/search?type=
 
 ## Basic commands
 
-Handling images:
-- List all base images: `docker image ls`
-- Remove images: `docker image rm [IMAGE NAMES]`
+### Handling images
 
-Handling containers:
-- List running containers: `docker ps`
-- List all containers: `docker container ls -a`
-- Launch a new container using an image: `docker run --name [ANY NAME YOU WANT FOR YOUR CONTAINER] [IMAGE NAME]` (a lot of options are possible like exposing port: `-p [PORT IN HOST SIDE]:[PORT IN IMAGE SIDE]`)
-- Stop a running container (will not be deleted): `docker stop [CONTAINER ID OR NAME]`
-- Start a container that was already launched before: `docker container start [CONTAINER ID OR NAME]`
-- Remove containers (must be stopped before): `docker container rm [CONTAINER IDS OR NAMES]`
+|Command|Description|
+|-------|-----------|
+|`docker image ls`|List all base images|
+|`docker image rm [IMAGE NAMES]`|Remove images|
 
-## Creating an image
+### Handling containers
 
-# Basic example
+|Command|Description|
+|-------|-----------|
+|`docker ps`|List running containers|
+|`docker container ls -a`|List all containers|
+|`docker run [OPTIONS] --name [NAME FOR YOUR CONTAINER] [IMAGE NAME] [POTENTIAL COMMAND]`|Create and launch a new container using an image|
+|`docker stop [CONTAINER ID OR NAME]`|Stop a running container (will not be deleted)|
+|`docker container start [CONTAINER ID OR NAME]`|Start a container that was already launched before|
+|`docker container rm [CONTAINER IDS OR NAMES]`|Remove containers (must be stopped before or add `-f` to force remove)|
+|`docker exec -t -i [CONTAINER ID OR NAME] [COMMAND]`|Execute command in container|
+
+
+## Creating an image and container (full explanation)
+
+### Basic build example
 
 In an empty folder, create a `DockerFile` file with this content:
 ```
@@ -42,3 +50,28 @@ RUN apt-get -y upgrade
 Launch this command from the folder containing the `DockerFile`:
 `docker built -t [MY NEW IMAGE NAME IN LOWERCASE] .`
 You now have an updated ubuntu image!
+
+Note: You can build in a not empty folder but you should ignore files you don't want by specifying them in a `.dockerignore` file.
+
+### More information about DockerFile
+
+|Command|Description|
+|-------|-----------|
+|`FROM [base image name]`|Image to use as base for our new image|
+|`MAINTENER [name]`|Specify the maintainer name|
+|`RUN [command]`|Execute specific command to build the image|
+|`COPY [FROM (local folder)] [TO (in docker image)]`|Add file in the image|
+|`WORKDIR [NEW PATH]`|Change work directory (all next command will be executed there)|
+|`EXPOSE [PORT NUMBER]`|Expose a port to the outside of the container|
+|`VOLUME [FOLDER IN THE CONTAINER]`|Expose a folder to the outside of the container|
+
+### Create and launch a new container
+
+`docker run [SOME OPTIONS] --name [NAME TO GIVE TO YOUR CONTAINER] [IMAGE TO USE] [POTENTIAL CMD]`
+
+|Option|Description|Link with Dockerfile|
+|------|-----------|--------------------|
+|`-v [local folder]:[container folder]`|Share container folder with a local folder|`VOLUME`|
+|`-p [local port]:[container port]`|Access the container port|`EXPOSE`|
+|`-d`|Launch the container in a deamon (background)||
+|`-it`|Launch the container in interactive mode in your command prompt)||
