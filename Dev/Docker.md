@@ -66,6 +66,8 @@ Note: You can build in a not empty folder but you should ignore files you don't 
 |`VOLUME [FOLDER IN THE CONTAINER]`|Expose a folder to the outside of the container|
 |`CMD [command]`|Commands to execute when starting the container|
 
+More information can be found here: https://docs.docker.com/engine/reference/builder/
+
 ### Create and launch a new container
 
 `docker run [SOME OPTIONS] --name [NAME TO GIVE TO YOUR CONTAINER] [IMAGE TO USE] [POTENTIAL CMD]`
