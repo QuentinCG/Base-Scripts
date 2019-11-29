@@ -32,6 +32,11 @@ You can find a lot of base image in <a href="https://hub.docker.com/search?type=
 |`docker container rm [CONTAINER IDS OR NAMES]`|Remove containers (must be stopped before or add `-f` to force remove)|
 |`docker exec -t -i [CONTAINER ID OR NAME] [COMMAND]`|Execute command in container|
 
+### Maintenance
+|Command|Description|
+|-------|-----------|
+|`docker export [CONTAINER NAME] \| gzip > [CONTAINER NAME].gz`|Export a container|
+|`zcat [CONTAINER NAME].gz \| docker import - [CONTAINER NAME]`|Import a container|
 
 ## Creating an image and container (full explanation)
 
