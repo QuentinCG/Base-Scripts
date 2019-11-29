@@ -37,6 +37,7 @@ You can find a lot of base image in <a href="https://hub.docker.com/search?type=
 |-------|-----------|
 |`docker export [CONTAINER NAME] \| gzip > [CONTAINER NAME].gz`|Export a container|
 |`zcat [CONTAINER NAME].gz \| docker import - [CONTAINER NAME]`|Import a container|
+|`docker commit [CONTAINER ID OR NAME] [NEW IMAGE NAME] && docker save [NEW IMAGE NAME] > [NEW IMAGE NAME].tar`|Create an image based on the container|
 
 ## Creating an image and container (full explanation)
 
