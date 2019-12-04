@@ -75,7 +75,7 @@ You could also create a `package.json` file following this standard:
 - <a target="_blank" href="https://github.com/axios/axios#example">Usage</a>:
 ```
 const httpRequest = require('axios');
- 
+
 // Make a request for a user with a given ID
 httpRequest.get('/user?ID=12345')
   .then(function (response) {
@@ -114,3 +114,15 @@ kitty.save().then(() => console.log('meow'));
   - If using react, also install `react-bootstrap` package (<a target="_blank" href="https://react-bootstrap.github.io/getting-started/introduction/">more information here</a>)
   - If using vuejs, also install `bootstrap-vue` package (<a target="_blank" href="https://bootstrap-vue.js.org/docs">more information here</a>)
   - If using angular: TODO
+
+## Sass (CSS compiler)
+
+- Install: `npm install node-sass sass-loader style-loader --save-dev`
+- <a target="_blank" href="https://sass-lang.com/guide">Usage</a>:
+```
+@import '../node_modules/bulma/bulma.sass'
+
+#app
+  color: #ffffff
+  margin-top: 60px
+```
