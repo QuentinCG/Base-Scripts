@@ -4,7 +4,7 @@ Docker is a  OS-level virtualization software used to deliver software in packag
 
 ## Install
 
-- From Debian: Follow instruction on <a href="https://docs.docker.com/install/linux/docker-ce/debian/">docker docs</a>
+- From Debian: `curl -sSL https://get.docker.com/ | sh` (or follow instruction on <a href="https://docs.docker.com/install/linux/docker-ce/debian/">docker docs</a>)
 - From Windows: You need to install <a href="https://www.docker.com/products/docker-desktop">Docker Desktop</a> which will create a kind of Linux VM in order to use Docker properly.
 
 ## Community
