@@ -58,6 +58,11 @@ You could also create a `package.json` file following this standard:
 
 # Useful NPM packages
 
+## Npm run all (run multiple commands in one command)
+
+- Install: `npm install --save-dev npm-run-all`
+- Usage: `npm-run-all CMD1 CMD2 ...`
+
 ## Nodemon (restarts node app when file change detected)
 
 - Install: `npm install --save-dev nodemon`
@@ -115,9 +120,14 @@ kitty.save().then(() => console.log('meow'));
   - If using vuejs, also install `bootstrap-vue` package (<a target="_blank" href="https://bootstrap-vue.js.org/docs">more information here</a>)
   - If using angular: TODO
 
+## Bulma (CSS framework)
+
+- Install: `npm install bulma`
+- <a target="_blank" href="https://bulma.io/documentation/overview/start/">Usage</a>
+
 ## Sass (CSS compiler)
 
-- Install: `npm install node-sass sass-loader style-loader --save-dev`
+- Install: `npm install node-sass sass-loader style-loader node-sass-chokidar --save-dev`
 - <a target="_blank" href="https://sass-lang.com/guide">Usage</a>:
 ```
 @import '../node_modules/bulma/bulma.sass'
@@ -125,4 +135,43 @@ kitty.save().then(() => console.log('meow'));
 #app
   color: #ffffff
   margin-top: 60px
+```
+
+## Vue.js (Js framework)
+
+- Install with help: `npm install --global vue-cli` (without help to integrate vue.js in existing project: `npm install vue`)
+- Usage:
+```
+# Create a vue.js project with webpack
+vue init webpack PROJECT_NAME
+cd PROJECT_NAME
+# Build the project
+npm install
+# Launch the project
+npm run dev
+```
+
+## React (Js framework)
+
+- Install with help: `npm install --global create-react-app` (without help to integrate in existing project: `npm install react react-router-dom`)
+- <a target="_blank" href="https://create-react-app.dev/docs/getting-started">Usage</a>:
+```
+create-react-app PROJECT_NAME
+cd PROJECT_NAME
+# Build and launch the project
+npm start
+```
+
+## Angular (Js/Typescript framework)
+
+- Install with help: `npm install --global @angular/cli` (without help to integrate in existing project: `npm install angular`)
+- <a target="_blank" href="https://angular.io/start">Usage</a>:
+```
+# Create an angular project with routing and sass
+ng new PROJECT_NAME --routing --style=sass
+cd PROJECT_NAME
+# Build and launch the project
+ng serve
+# Generate a new component
+ng generate component COMPONENT_NAME
 ```
